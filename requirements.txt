@@ -8,6 +8,8 @@ setuptools
 twine
 wheel
 
+wave
+
 # python and debugging
 ipdb
 ipykernel
