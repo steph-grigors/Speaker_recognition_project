@@ -1,18 +1,18 @@
-""" This function takes the train.csv file as argument.
-The path must may be adapted to absolute path
-The for loop iterate over all rows of the DataFrame train.csv :
-- The way is created by joining the initiale path(TBM) and the path of each files which is the column
-'file_path' of the train.csv DataFrame.
-- Calculation of each paramaters to plot the Signal Amplitude and the Frequency Spectrum
-- Plot the Signal Amplitude and the Frequency Spectrum
-"""
-
 import wave
 import os
 import numpy as np
 
 
 def prepoc_df(df_train):
+
+    """ This function takes the train.csv file as argument.
+    The path must may be adapted to absolute path
+    The for loop iterate over all rows of the DataFrame train.csv :
+    - The way is created by joining the initiale path(TBM) and the path of each files which is the column
+    'file_path' of the train.csv DataFrame.
+    - Calculation of each paramaters to plot the Signal Amplitude and the Frequency Spectrum
+    - Plot the Signal Amplitude and the Frequency Spectrum
+    """
 
     path ='../raw_data'
 
