@@ -2,8 +2,7 @@ import wave
 import os
 import numpy as np
 
-
-def prepoc_df(df_train):
+def cleaned_df(df_raw):
 
     """ This function takes the train.csv file as argument.
     The path must may be adapted to absolute path
@@ -11,10 +10,10 @@ def prepoc_df(df_train):
     - The way is created by joining the initiale path(TBM) and the path of each files which is the column
     'file_path' of the train.csv DataFrame.
     - Calculation of each paramaters to plot the Signal Amplitude and the Frequency Spectrum
-    - Plot the Signal Amplitude and the Frequency Spectrum
+    - Plot
     """
 
-    path ='../raw_data'
+    path = os.path.dirname(os.getcwd())
 
     #Initiate empty lists
     list_n_channels=[]
@@ -25,8 +24,8 @@ def prepoc_df(df_train):
     list_signal_array=[]
     list_times=[]
 
-    for row in range(len(df_train)):
-        wav_obj = wave.open(os.path.join(path,df_train['file_path'][row]), 'rb')
+    for row in range(len(df_raw)):
+        wav_obj = wave.open(os.path.join(path,'raw_data',df_raw['file_path'][row]), 'rb')
         # Check the number of channels (e.g file recorder in stereo has 2 indepedent audio channels
         # (has 2 channels). This crereates the impression of the sound coming from two different directions)
         n_channels  = wav_obj.getnchannels()
@@ -53,20 +52,14 @@ def prepoc_df(df_train):
         list_times.append(times)
 
     #Convert all lists into a column of DataFrame
-    df_train['n_channel'] = list_n_channels
-    df_train['sample_freq'] = list_sample_freg
-    df_train['n_samples'] = list_n_samples
-    df_train['t_audio'] = list_t_audio
-    df_train['signal_wave'] = list_signal_wave
-    df_train['signal_array'] = list_signal_array
-    df_train['times'] = list_times
+    df_raw['n_channel'] = list_n_channels
+    df_raw['sample_freq'] = list_sample_freg
+    df_raw['n_samples'] = list_n_samples
+    df_raw['t_audio'] = list_t_audio
+    df_raw['signal_wave'] = list_signal_wave
+    df_raw['signal_array'] = list_signal_array
+    df_raw['times'] = list_times
 
+    df_cleaned = df_raw
 
-    mins = df_train["signal_array"].apply(np.min)
-    maxs = df_train["signal_array"].apply(np.max)
-
-    df_train['amplitude'] = abs(maxs - mins)
-
-    df_train_preproc = df_train
-
-    return df_train_preproc
+    return df_cleaned
