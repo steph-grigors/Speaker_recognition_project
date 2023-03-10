@@ -26,7 +26,6 @@ tensorflow==2.10.0; sys_platform != 'darwin'                                    
 
 # Google Cloud
 google-cloud-storage
-
 python-dotenv
 
 # API
