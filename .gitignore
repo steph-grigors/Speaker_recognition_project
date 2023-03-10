@@ -37,8 +37,11 @@ models/
 secrets.toml
 *.json
 
+.env.sample
+
 # notebooks directory
 notebooks
 
 # User defined extras
 # Complete to your desire
+# Key
