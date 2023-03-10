@@ -93,7 +93,7 @@ def cleaned_df(dataset: str) -> pd.DataFrame:
     assert dataset == 'train' or dataset == 'test'
 
     train_in = 'train.csv'
-    test_in = 'test.csv'
+    test_in = 'test_full.csv'
     train_out = 'cleaned_train.csv'
     test_out = 'cleaned_test.csv'
 
