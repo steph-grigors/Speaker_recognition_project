@@ -1,6 +1,7 @@
 import wave
 import os
 import numpy as np
+import pandas as pd
 from pathlib import Path
 from who_dis.ml_logic.registry import load_cleaned_df
 from who_dis.ml_logic.preprocess import get_MFCC_features
@@ -79,7 +80,7 @@ def eda_df(df_raw):
 
 ##########################################################################################################
 
-def cleaned_df(df_raw):
+def cleaned_df(dataset: str) -> pd.DataFrame:
 
     """ This function takes the train.csv file (in the form of a dataframe) as argument.
     The path must may be adapted to absolute path
@@ -89,10 +90,24 @@ def cleaned_df(df_raw):
     - Calculation of each paramaters to plot the Signal Amplitude and the Frequency Spectrum
     - Plot
     """
+    assert dataset == 'train' or dataset == 'test'
 
-    path = os.path.dirname(os.getcwd())
-    output_df_cleaned_path = os.path.join(path,'raw_data','output_df_cleaned_preprocessing.csv')
-    csv_path = Path(output_df_cleaned_path)
+    train_in = 'train.csv'
+    test_in = 'test.csv'
+    train_out = 'cleaned_train.csv'
+    test_out = 'cleaned_test.csv'
+
+    path = os.path.abspath(os.path.dirname(os.getcwd()))
+
+    train_csv_path = os.path.join(path,'raw_data', train_in)
+    test_csv_path = os.path.join(path,'raw_data', test_in)
+
+    cleaned_train_csv_path = os.path.join(path,'raw_data', train_out)
+    cleaned_test_csv_path = os.path.join(path,'raw_data', test_out)
+
+    csv_train_path = Path(cleaned_train_csv_path)
+    csv_test_path = Path(cleaned_test_csv_path)
+
 
     #Initiate empty lists
     list_n_samples =[]
@@ -103,55 +118,110 @@ def cleaned_df(df_raw):
     #Sample_frequency
     sample_rate = 16000
 
-    i = 0
-    tot = len(df_raw)
 
-    if csv_path.is_file():
-        df_cleaned = load_cleaned_df(output_df_cleaned_path)
+    if dataset == 'train':
+
+        if csv_train_path.is_file():
+            df_cleaned = load_cleaned_df(cleaned_train_csv_path)
+
+        else:
+            df_raw = pd.read_csv(train_csv_path)
+            i = 0
+            tot = len(df_raw)
+            for row in range(len(df_raw)):
+                i += 1
+                print(f"Treating {i} / {tot}", end='\r')
+                filename = os.path.join(path,'raw_data',df_raw['file_path'][row])
+                with wave.open(filename, 'rb') as wav_obj:
+                    # Check the number of channels (e.g file recorder in stereo has 2 indepedent audio channels
+                    # (has 2 channels). This crereates the impression of the sound coming from two different directions)
+                    n_samples = wav_obj.getnframes()
+                    # how long our audio file is in seconds
+                    t_audio = n_samples/sample_rate
+                    # the amplitude of the wave at that point in time
+                    signal_wave = wav_obj.readframes(n_samples)
+                    # Turn signal wave into numpy array to get signal values from this
+                    signal_array = np.frombuffer(signal_wave, dtype=np.int16)
+                    # Audio represents the values in float of each of the n_samples
+                    audio, sample_rate = load_audio_file(filename)
+                    # Extracting features from the audiofiles
+                    features=get_MFCC_features(audio, sample_rate)
+
+                # append respective lists of different values determinated above
+                list_n_samples.append(n_samples)
+                list_t_audio.append(t_audio)
+                list_signal_array.append(signal_array)
+                list_extracted_features.append(features)
+
+            # Convert all lists into a column of DataFrame
+            df_raw['n_samples'] = list_n_samples
+            df_raw['t_audio'] = list_t_audio
+            df_raw['signal_array'] = list_signal_array
+            df_raw['MFCC_features'] = list_extracted_features
+
+            # Create an 'Amplitude' column
+            mins = df_raw["signal_array"].apply(np.min)
+            maxs = df_raw["signal_array"].apply(np.max)
+            df_raw['amplitude'] = np.abs(maxs - mins)
+
+
+            # Dropping unnecessary columns
+            df_cleaned = df_raw.drop(columns=['id', 'signal_array'])
+
+        # Save the file locally for future usage
+        df_cleaned.to_csv(cleaned_train_csv_path)
 
     else:
-        for row in range(len(df_raw)):
-            i += 1
-            print(f"Treating {i} / {tot}", end='\r')
-            filename = os.path.join(path,'raw_data',df_raw['file_path'][row])
-            with wave.open(filename, 'rb') as wav_obj:
-                # Check the number of channels (e.g file recorder in stereo has 2 indepedent audio channels
-                # (has 2 channels). This crereates the impression of the sound coming from two different directions)
-                n_samples = wav_obj.getnframes()
-                # how long our audio file is in seconds
-                t_audio = n_samples/sample_rate
-                # the amplitude of the wave at that point in time
-                signal_wave = wav_obj.readframes(n_samples)
-                # Turn signal wave into numpy array to get signal values from this
-                signal_array = np.frombuffer(signal_wave, dtype=np.int16)
-                # Audio represents the values in float of each of the n_samples
-                audio, sample_rate = load_audio_file(filename)
-                # Extracting features from the audiofiles
-                features=get_MFCC_features(audio, sample_rate)
 
-            # append respective lists of different values determinated above
-            list_n_samples.append(n_samples)
-            list_t_audio.append(t_audio)
-            list_signal_array.append(signal_array)
-            list_extracted_features.append(features)
+        if csv_test_path.is_file():
+            df_cleaned = load_cleaned_df(cleaned_test_csv_path)
 
-        # Convert all lists into a column of DataFrame
-        df_raw['n_samples'] = list_n_samples
-        df_raw['t_audio'] = list_t_audio
-        df_raw['signal_array'] = list_signal_array
-        df_raw['MFCC_features'] = list_extracted_features
+        else:
+            df_raw = pd.read_csv(test_csv_path)
+            i = 0
+            tot = len(df_raw)
+            for row in range(len(df_raw)):
+                i += 1
+                print(f"Treating {i} / {tot}", end='\r')
+                filename = os.path.join(path,'raw_data',df_raw['file_path'][row])
+                with wave.open(filename, 'rb') as wav_obj:
+                    # Check the number of channels (e.g file recorder in stereo has 2 indepedent audio channels
+                    # (has 2 channels). This crereates the impression of the sound coming from two different directions)
+                    n_samples = wav_obj.getnframes()
+                    # how long our audio file is in seconds
+                    t_audio = n_samples/sample_rate
+                    # the amplitude of the wave at that point in time
+                    signal_wave = wav_obj.readframes(n_samples)
+                    # Turn signal wave into numpy array to get signal values from this
+                    signal_array = np.frombuffer(signal_wave, dtype=np.int16)
+                    # Audio represents the values in float of each of the n_samples
+                    audio, sample_rate = load_audio_file(filename)
+                    # Extracting features from the audiofiles
+                    features=get_MFCC_features(audio, sample_rate)
 
-        # Create an 'Amplitude' column
-        mins = df_raw["signal_array"].apply(np.min)
-        maxs = df_raw["signal_array"].apply(np.max)
-        df_raw['amplitude'] = np.abs(maxs - mins)
+                # append respective lists of different values determinated above
+                list_n_samples.append(n_samples)
+                list_t_audio.append(t_audio)
+                list_signal_array.append(signal_array)
+                list_extracted_features.append(features)
+
+            # Convert all lists into a column of DataFrame
+            df_raw['n_samples'] = list_n_samples
+            df_raw['t_audio'] = list_t_audio
+            df_raw['signal_array'] = list_signal_array
+            df_raw['MFCC_features'] = list_extracted_features
+
+            # Create an 'Amplitude' column
+            mins = df_raw["signal_array"].apply(np.min)
+            maxs = df_raw["signal_array"].apply(np.max)
+            df_raw['amplitude'] = np.abs(maxs - mins)
 
 
-        # Dropping unnecessary columns
-        df_cleaned = df_raw.drop(columns=['id', 'signal_array'])
+            # Dropping unnecessary columns
+            df_cleaned = df_raw.drop(columns=['id', 'signal_array'])
 
-        # Checking whether the file is already saved locally, otherwise save it.
-        if not csv_path.is_file():
-            df_cleaned.to_csv(output_df_cleaned_path)
+        # Save the file locally for future usage
+        df_cleaned.to_csv(cleaned_test_csv_path)
+
 
     return df_cleaned
