@@ -1,5 +1,5 @@
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D
+from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D, Dropout
 from tensorflow.keras.metrics import Recall, Precision
 from tensorflow.keras import callbacks
 
@@ -14,6 +14,7 @@ def init_baseCNN():
     model = Sequential()
     model.add(Conv2D(5, (3,3), activation='relu', input_shape=(128, 751, 1)))
     model.add(MaxPool2D(pool_size=(2,2)))
+    model.add(Dropout(rate=0.4))
     model.add(Flatten())
     model.add(Dense(18, activation='softmax'))
 
@@ -42,9 +43,7 @@ def basic_compiler(model):
     '''
     model.compile(optimizer='adam',
                  loss='categorical_crossentropy',
-                 metrics=[Recall(), Precision()])
-
-    model.summary()
+                 metrics=['accuracy', Recall(), Precision()])
 
     return model
 
