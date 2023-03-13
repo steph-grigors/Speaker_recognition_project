@@ -18,7 +18,6 @@ def load_audio_file(audiofile_path):
 
     return audio, sample_rate
 
-
 def load_cleaned_df(csv_path):
     '''
     Fetch the dataframe containing the main informations about the data.
@@ -30,7 +29,8 @@ def load_cleaned_df(csv_path):
 
 def save_preprocessed(MFCC_feat, MEL_spec,target) -> None:
     '''
-
+    Saving preprocessed data in a local file or/and in a BQ dataset.
+    Takes in the MFCC features, the MEL spectrograms, and the target labels.
     '''
     # save preprocessed data locally
     data_path = os.path.join(LOCAL_REGISTRY_PATH, 'prepro_data')
@@ -64,11 +64,9 @@ def save_preprocessed(MFCC_feat, MEL_spec,target) -> None:
         job3 = client.load_table_from_dataframe(target, target_table, job_config=job_config)
         result = job3.result()
 
-        print(f"✅ Data saved to bigquery
+        print(f"✅ Data saved to bigquery.")
 
     return None
-
-
 
 def save_model(model: keras.Model = None) -> None:
     """
