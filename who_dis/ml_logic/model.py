@@ -1,7 +1,11 @@
+from colorama import Fore, Style
+from typing import Tuple
+import numpy as np
+from tensorflow import keras
+from keras import Model, regularizers, optimizers, callbacks
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D, Dropout
 from tensorflow.keras.metrics import Recall, Precision
-from tensorflow.keras import callbacks
 
 
 def init_baseCNN():
@@ -14,9 +18,11 @@ def init_baseCNN():
     model = Sequential()
     model.add(Conv2D(5, (3,3), activation='relu', input_shape=(128, 751, 1)))
     model.add(MaxPool2D(pool_size=(2,2)))
-    model.add(Dropout(rate=0.4))
+    model.add(Dropout(rate=0.5))
     model.add(Flatten())
     model.add(Dense(18, activation='softmax'))
+
+    print("✅ model CNN initialized")
 
     return model
 
@@ -30,9 +36,11 @@ def init_baseNN():
     model.add(Dense(50,activation='relu',input_dim=40))
     model.add(Dense(18,activation='softmax'))
 
+    print("✅ model ANN initialized")
+
     return model
 
-def basic_compiler(model):
+def basic_compiler(model: Model, learning_rate=0.001) -> Model:
     '''
     This function takes in a model, compiles it and returns the compiled model.
     Compiler parameters:
@@ -41,31 +49,71 @@ def basic_compiler(model):
     - metrics: [tensorflow.metrics.Recall(),
                 tensorflow.metrics.Precision()]
     '''
-    model.compile(optimizer='adam',
+    optimizer = optimizers.Adam(learning_rate=learning_rate)
+    model.compile(optimizer=optimizer,
                  loss='categorical_crossentropy',
                  metrics=['accuracy', Recall(), Precision()])
 
+    print("✅ model compiled")
+
     return model
 
-def train_model(model, X_train, y_train):
+def train_model(model: Model,
+                X_train: np.ndarray,
+                y_train: np.ndarray,
+                batch_size=64,
+                patience=5,
+                validation_split=0.2) -> Tuple[Model, dict]:
+    """
+    Fit model and return a the tuple (fitted_model, history)
+    """
+    print(Fore.BLUE + "\nTrain model..." + Style.RESET_ALL)
 
-    es = callbacks.EarlyStopping(patience=20, restore_best_weights=True)
+    es = callbacks.EarlyStopping(monitor="val_loss",
+                                 patience=patience,
+                                 restore_best_weights=True)
 
     history = model.fit(X_train, y_train,
-          batch_size=64, # Batch size -too small--> no generalization
+          batch_size=batch_size, # Batch size -too small--> no generalization
           epochs=5,    #            -too large--> slow computations
-          validation_split=0.2,
+          validation_split=validation_split,
           callbacks=[es],
           verbose=1)
 
-    return history
+    print(f"✅ model trained on {len(X_train)} rows")
+
+    return model, history
 
 
-def evaluate_model(model, X_test, y_test):
+def evaluate_model(model: Model,
+                   X_test: np.ndarray,
+                   y_test: np.ndarray,
+                   batch_size=64) -> Tuple[Model, dict]:
 
- model_evaluate = model.evaluate(X_test, y_test, verbose=0)
+    """
+    Evaluate trained model performance on dataset
+    """
+    print(Fore.BLUE + f"\nEvaluate model on {len(X_test)} rows..." + Style.RESET_ALL)
 
- return model_evaluate
+    if model is None:
+        print(f"\n❌ no model to evaluate")
+        return None
+
+    metrics = model.evaluate(
+        X_test=X_test,
+        y_test=y_test,
+        batch_size=batch_size,
+        verbose=0,
+        return_dict=True
+        )
+
+    accuracy = metrics['accuracy']
+    precision = metrics['precision']
+    recall = metrics['recall']
+
+    print(f"✅ model evaluated: accuracy, precision, recall {round(accuracy, 3)}, {round(precision, 3)}, {round(recall, 3)}")
+
+    return metrics
 
 def predict_model(model, X_test):
 

@@ -4,6 +4,7 @@ import numpy as np
 import librosa
 from pathlib import Path
 import matplotlib.pyplot as plt
+from who_dis.ml_logic.registry import load_audio_file
 from sklearn.preprocessing import OneHotEncoder
 
 
@@ -21,13 +22,6 @@ def OHE_target(clean_df):
 
     return y_encoded
 
-def load_audio_file(audiofile_path):
-    '''audio represents the values of each of the n_samples taken at a 16Khz frequency rate
-    sample_rate is set to None as to use the native sampling rate
-    mono = True sets the n_channels to 1'''
-    audio, sample_rate = librosa.load(audiofile_path, sr= None, mono = True, offset = 0.0, duration = 6.0, res_type='soxr_hq')
-
-    return audio, sample_rate
 
 def get_MFCC_features(audio, sample_rate = 16000):
     '''
@@ -38,13 +32,6 @@ def get_MFCC_features(audio, sample_rate = 16000):
     mfccs_scaled_features = np.mean(mfccs_features.T,axis=0)
 
     return mfccs_scaled_features
-
-def show_MEL_spectrogram(audio, sample_rate = 16000):
-    mel_spect = librosa.feature.melspectrogram(y=audio, sr=sample_rate, n_fft=512, hop_length=128, center = True, pad_mode = 'symmetric')
-    mel_spect = librosa.power_to_db(mel_spect, ref=np.max)
-    librosa.display.specshow(mel_spect, y_axis='mel', fmax=16000, x_axis='time');
-    plt.title('Mel Spectrogram');
-    plt.colorbar(format='%+2.0f dB');
 
 
 def get_MEL_spectrogram(audio, sample_rate = 16000):
