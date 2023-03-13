@@ -68,6 +68,49 @@ def save_preprocessed(MFCC_feat, MEL_spec,target) -> None:
 
     return None
 
+def load_preprocessed():
+    '''
+    Loads the preprocessed data from the local path or from the BQ datasets.
+    Return MFCC features, MEL spectrograms and target in that order.
+    '''
+    if DATA_TARGET == 'local':
+        data_path = os.path.join(LOCAL_REGISTRY_PATH, 'prepro_data')
+        MFCC_feat = pickle.load(os.path.join(data_path,'MFCC_features.pickle'))
+        MEL_spectrograms = pickle.load(os.path.join(data_path,'MEL_spectrograms.pickle'))
+        target = pickle.load(os.path.join(data_path, 'labeled_target.pickle'))
+
+        return MFCC_feat, MEL_spectrograms, target
+
+    elif DATA_TARGET == 'bq':
+        from google.cloud import bigquery as bq
+        MFCC_table = f'{GCP_PROJECT}.{BQ_DATASET}.MFCC_features'
+        MEL_spectrogram_table = f'{GCP_PROJECT}.{BQ_DATASET}.MEL_spectrograms'
+        target_table = f'{GCP_PROJECT}.{BQ_DATASET}.labeled_target'
+
+        client = bq.Client(GCP_PROJECT)
+        query_job1 = client.query(f'''
+                                SELECT *
+                                FROM {MFCC_table}
+                                ''')
+        result1 = query_job1.result()
+        MFCC_feat = result1.to_dataframe()
+        query_job2 = client.query(f'''
+                                SELECT *
+                                FROM {MEL_spectrogram_table}
+                                ''')
+        result2 = query_job2.result()
+        MEL_spectrograms = result1.to_dataframe()
+        query_job3 = client.query(f'''
+                                SELECT *
+                                FROM {target_table}
+                                ''')
+        result3 = query_job3.result()
+        target = result3.to_dataframe()
+
+        print(f"✅ Data loaded.")
+
+        return MFCC_feat, MEL_spectrograms, target
+
 def save_model(model: keras.Model = None) -> None:
     """
     Persist trained model locally on hard drive at f"{LOCAL_REGISTRY_PATH}/models/{timestamp}.h5"
