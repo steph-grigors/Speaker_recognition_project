@@ -115,7 +115,6 @@ def cleaned_df(dataset: str) -> pd.DataFrame:
     list_n_samples =[]
     list_t_audio =[]
     list_signal_array=[]
-    list_extracted_features = []
 
     #Sample_frequency
     sample_rate = 16000
