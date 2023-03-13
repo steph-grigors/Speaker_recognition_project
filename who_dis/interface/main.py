@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 from who_dis.params import *
-from who_dis.ml_logic.registry import save_preprocessed
+from sklearn.preprocessing import OneHotEncoder
+from who_dis.ml_logic.registry import save_preprocessed, load_preprocessed
 
 
 
@@ -83,7 +84,7 @@ def evaluate(X_test, y_test):
     return metrics
 
 
-def pred(X_pred: pd.DataFrame = None) -> np.ndarray:
+def pred(X_pred_index: int) -> np.ndarray:
     """
     Make a prediction using the latest trained model
     """
@@ -94,12 +95,22 @@ def pred(X_pred: pd.DataFrame = None) -> np.ndarray:
     model = load_model()
     assert model is not None
 
-    X_pred = load_preprocessed(X_pred)
+    X_pred_df = load_preprocessed('test')
+    X_pred = X_pred_df[X_pred_index]
+    columns_names = X_pred.columns.tolist()
+    unwanted_columns_names = ['file_path',
+                        'speech',
+                        'speaker',
+                        'n_samples',
+                        't_audio',
+                        'amplitude']
+    classes = [name for name in columns_names if name not in unwanted_columns_names]
     y_pred = model.predict(X_pred)
 
-    ######## NEED TO CREATE A PREPROCESS PIPELINE FUNCT###
-    # X_processed = preprocess_features(X_pred)
-
     print("\n✅ prediction done: ", y_pred, y_pred.shape, "\n")
+    print(f"\n✅ The person whom voice you heard is: {classes[np.argmax(y_pred)]}" "\n")
 
     return y_pred
+
+if __name__ == "__main__":
+    pass
