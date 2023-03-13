@@ -27,19 +27,20 @@ def load_cleaned_df(csv_path):
     df_cleaned = pd.read_csv(csv_path)
     return df_cleaned
 
-def save_preprocessed(MFCC_feat, MEL_spec,target) -> None:
+def save_preprocessed(MFCC_feat, MEL_spec,target,data: str ) -> None:
     '''
     Saving preprocessed data in a local file or/and in a BQ dataset.
     Takes in the MFCC features, the MEL spectrograms, and the target labels.
+    It also takes in a string which is to be set as 'train' or 'test'
     '''
     # save preprocessed data locally
     data_path = os.path.join(LOCAL_REGISTRY_PATH, 'prepro_data')
 
     preprocessed_data = [MFCC_feat, MEL_spec,target]
     paths = []
-    paths.append(os.path.join(data_path,'MFCC_features.pickle'))
-    paths.append(os.path.join(data_path,'MEL_spectrograms.pickle'))
-    paths.append(os.path.join(data_path, 'labeled_target.pickle'))
+    paths.append(os.path.join(data_path,f'MFCC_features_{data}.pickle'))
+    paths.append(os.path.join(data_path,f'MEL_spectrograms_{data}.pickle'))
+    paths.append(os.path.join(data_path, f'labeled_target_{data}.pickle'))
 
     for data,path in zip(preprocessed_data,paths):
         with open(path) as file:
@@ -53,9 +54,9 @@ def save_preprocessed(MFCC_feat, MEL_spec,target) -> None:
         write_mode = "WRITE_TRUNCATE"
         job_config = bigquery.LoadJobConfig(write_disposition=write_mode)
 
-        MFCC_table = f'{GCP_PROJECT}.{BQ_DATASET}.MFCC_features'
-        MEL_spectrogram_table = f'{GCP_PROJECT}.{BQ_DATASET}.MEL_spectrograms'
-        target_table = f'{GCP_PROJECT}.{BQ_DATASET}.labeled_target'
+        MFCC_table = f'{GCP_PROJECT}.{BQ_DATASET}.MFCC_features_{data}'
+        MEL_spectrogram_table = f'{GCP_PROJECT}.{BQ_DATASET}.MEL_spectrograms_{data}'
+        target_table = f'{GCP_PROJECT}.{BQ_DATASET}.labeled_target_{data}'
 
         job1 = client.load_table_from_dataframe(MFCC_feat, MFCC_table, job_config=job_config)
         result = job1.result()
@@ -67,6 +68,50 @@ def save_preprocessed(MFCC_feat, MEL_spec,target) -> None:
         print(f"✅ Data saved to bigquery.")
 
     return None
+
+def load_preprocessed(data: str):
+    '''
+    Loads the preprocessed data from the local path or from the BQ datasets.
+    Takes in which data the user wants to load 'train' or 'test'.
+    Return MFCC features, MEL spectrograms and target in that order.
+    '''
+    if DATA_TARGET == 'local':
+        data_path = os.path.join(LOCAL_REGISTRY_PATH, 'prepro_data')
+        MFCC_feat = pickle.load(os.path.join(data_path,f'MFCC_features_{data}.pickle'))
+        MEL_spectrograms = pickle.load(os.path.join(data_path,f'MEL_spectrograms_{data}.pickle'))
+        target = pickle.load(os.path.join(data_path, f'labeled_target_{data}.pickle'))
+
+        return MFCC_feat, MEL_spectrograms, target
+
+    elif DATA_TARGET == 'bq':
+        from google.cloud import bigquery as bq
+        MFCC_table = f'{GCP_PROJECT}.{BQ_DATASET}.MFCC_features_{data}'
+        MEL_spectrogram_table = f'{GCP_PROJECT}.{BQ_DATASET}.MEL_spectrograms_{data}'
+        target_table = f'{GCP_PROJECT}.{BQ_DATASET}.labeled_target_{data}'
+
+        client = bq.Client(GCP_PROJECT)
+        query_job1 = client.query(f'''
+                                SELECT *
+                                FROM {MFCC_table}
+                                ''')
+        result1 = query_job1.result()
+        MFCC_feat = result1.to_dataframe()
+        query_job2 = client.query(f'''
+                                SELECT *
+                                FROM {MEL_spectrogram_table}
+                                ''')
+        result2 = query_job2.result()
+        MEL_spectrograms = result2.to_dataframe()
+        query_job3 = client.query(f'''
+                                SELECT *
+                                FROM {target_table}
+                                ''')
+        result3 = query_job3.result()
+        target = result3.to_dataframe()
+
+        print(f"✅ Data loaded.")
+
+        return MFCC_feat, MEL_spectrograms, target
 
 def save_model(model: keras.Model = None) -> None:
     """
