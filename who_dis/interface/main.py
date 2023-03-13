@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 from who_dis.params import *
 from sklearn.preprocessing import OneHotEncoder
-from who_dis.ml_logic.registry import save_preprocessed, load_preprocessed
+from who_dis.ml_logic.registry import save_preprocessed, load_preprocessed, load_model, save_model, save_results
+from who_dis.ml_logic.model import init_baseCNN, init_baseCNN, basic_compiler, train_model
 
 
 
@@ -15,10 +16,10 @@ def preprocess() -> None:
     cleaned_train = cleaned_df(dataset='train')
     cleaned_test = cleaned_df(dataset='test')
 
-    X1_train = MFCC_features_extractor(dataset='train')
-    X1_test = MFCC_features_extractor(dataset='test')
-    X_train = MEL_spect_features_extractor(dataset='train')
-    X_test = MEL_spect_features_extractor(dataset='test')
+    X1_train = MFCC_features_extractor(cleaned_train, dataset='train')
+    X1_test = MFCC_features_extractor(cleaned_test, dataset='test')
+    X_train = MEL_spect_features_extractor(cleaned_train, dataset='train')
+    X_test = MEL_spect_features_extractor(cleaned_test, dataset='test')
     y_train = OHE_target(cleaned_train)
     y_test = OHE_target(cleaned_test)
 
@@ -27,11 +28,11 @@ def preprocess() -> None:
 
     print("✅ preprocess() done \n")
 
+    return X_train, y_train, X_test, y_test
+
 
 def train(X_train, y_train):
 
-    from who_dis.ml_logic.registry import load_model, save_model, save_results
-    from who_dis.ml_logic.model import init_baseCNN, init_baseCNN, basic_compiler, train_model
 
     # Train model using `model.py`
     model = load_model()

@@ -14,9 +14,8 @@ def load_audio_file(audiofile_path):
     sample_rate is set to None as to use the native sampling rate
     mono = True sets the n_channels to 1
     duration can be changed in params but is set to None by default - set the value in seconds if we only need to load  x seconds of the audiofile
-    audiofile trimmed to remove silences at its beginning and end
     '''
-    audio, sample_rate = librosa.load(audiofile_path, sr= None, mono = True, offset = 0.0, duration = duration, res_type='soxr_hq')
+    audio, sample_rate = librosa.load(audiofile_path, sr= None, mono = True, offset = 0.0, res_type='soxr_hq')
 
     return audio, sample_rate
 

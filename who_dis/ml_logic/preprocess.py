@@ -6,7 +6,6 @@ from who_dis.ml_logic.registry import load_audio_file
 from who_dis.params import *
 
 
-
 def OHE_target(clean_df):
 
     # Instantiate the OneHotEncoder
@@ -33,7 +32,7 @@ def get_MFCC_features(audio, sample_rate):
     return mfccs_scaled_features
 
 
-def get_MEL_spectrogram(audio, sample_rate, n_fft, hop_length):
+def get_MEL_spectrogram(audio, sample_rate):
     mel_spect = librosa.feature.melspectrogram(y=audio, sr=sample_rate, n_fft=n_fft, hop_length=hop_length, n_mels=n_mels, center = True, pad_mode = 'symmetric')
     mel_spect = np.expand_dims(mel_spect, axis = 2)
     mel_spect = librosa.util.pad_center(mel_spect, size = 751, axis = 1)

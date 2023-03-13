@@ -4,8 +4,9 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from who_dis.ml_logic.registry import load_cleaned_df
-from who_dis.ml_logic.preprocess import get_MFCC_features
+# from who_dis.ml_logic.preprocess import get_MFCC_features
 from who_dis.ml_logic.preprocess import load_audio_file
+from who_dis.params import *
 
 
 def eda_df(df_raw):
@@ -115,9 +116,6 @@ def cleaned_df(dataset: str) -> pd.DataFrame:
     list_n_samples =[]
     list_t_audio =[]
     list_signal_array=[]
-
-    #Sample_frequency
-    sample_rate = 16000
 
     if dataset == 'train':
 
