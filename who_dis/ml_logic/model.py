@@ -88,7 +88,7 @@ def train_model(model: Model,
 def evaluate_model(model: Model,
                    X_test: np.ndarray,
                    y_test: np.ndarray,
-                   batch_size=64) -> Tuple[Model, dict]:
+                   batch_size=int) -> Tuple[Model, dict]:
 
     """
     Evaluate trained model performance on dataset
@@ -103,7 +103,7 @@ def evaluate_model(model: Model,
         X_test=X_test,
         y_test=y_test,
         batch_size=batch_size,
-        verbose=0,
+        verbose=1,
         return_dict=True
         )
 

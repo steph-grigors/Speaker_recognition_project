@@ -1,11 +1,10 @@
-import wave
 import os
 import numpy as np
 import librosa
-from pathlib import Path
-import matplotlib.pyplot as plt
-from who_dis.ml_logic.registry import load_audio_file
 from sklearn.preprocessing import OneHotEncoder
+from who_dis.ml_logic.registry import load_audio_file
+from who_dis.params import *
+
 
 
 def OHE_target(clean_df):
@@ -23,7 +22,7 @@ def OHE_target(clean_df):
     return y_encoded
 
 
-def get_MFCC_features(audio, sample_rate = 16000):
+def get_MFCC_features(audio, sample_rate):
     '''
     mfccs_scaled_features is an array of shape (40, ) MFC coefficients that represent our features
     '''
@@ -34,9 +33,8 @@ def get_MFCC_features(audio, sample_rate = 16000):
     return mfccs_scaled_features
 
 
-def get_MEL_spectrogram(audio, sample_rate = 16000):
-    mel_spect = librosa.feature.melspectrogram(y=audio, sr=sample_rate, n_fft=512, hop_length=128, center = True, pad_mode = 'symmetric')
-    # mel_spect = librosa.power_to_db(mel_spect, ref=np.max)
+def get_MEL_spectrogram(audio, sample_rate, n_fft, hop_length):
+    mel_spect = librosa.feature.melspectrogram(y=audio, sr=sample_rate, n_fft=n_fft, hop_length=hop_length, center = True, pad_mode = 'symmetric')
     mel_spect = np.expand_dims(mel_spect, axis = 2)
     mel_spect = librosa.util.pad_center(mel_spect, size = 751, axis = 1)
 
