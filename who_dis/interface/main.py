@@ -26,7 +26,8 @@ def train():
     model = load_model()
     if model is None:
         model = init_baseCNN()
-    model = basic_compiler(model, learning_rate=0.001)
+        model = basic_compiler(model, learning_rate=0.001)
+
     model, history = train_model(model, X_train, y_train,
                                 batch_size=64,
                                 patience=5,
