@@ -92,11 +92,13 @@ def cleaned_df(dataset: str) -> pd.DataFrame:
     """
     assert dataset == 'train' or dataset == 'test'
 
+    # Paths endings for the initial train/test.csv files, and the cleaned train/test.csv files
     train_in = 'train.csv'
     test_in = 'test_full.csv'
     train_out = 'cleaned_train.csv'
     test_out = 'cleaned_test.csv'
 
+    # Absolute paths to the local repository and .csv files
     path = os.path.abspath(os.path.dirname(os.getcwd()))
 
     train_csv_path = os.path.join(path,'raw_data', train_in)
@@ -105,9 +107,9 @@ def cleaned_df(dataset: str) -> pd.DataFrame:
     cleaned_train_csv_path = os.path.join(path,'raw_data', train_out)
     cleaned_test_csv_path = os.path.join(path,'raw_data', test_out)
 
+    # Train/test.csv paths to test if is.file() exists
     csv_train_path = Path(cleaned_train_csv_path)
     csv_test_path = Path(cleaned_test_csv_path)
-
 
     #Initiate empty lists
     list_n_samples =[]
@@ -117,7 +119,6 @@ def cleaned_df(dataset: str) -> pd.DataFrame:
 
     #Sample_frequency
     sample_rate = 16000
-
 
     if dataset == 'train':
 
@@ -144,20 +145,20 @@ def cleaned_df(dataset: str) -> pd.DataFrame:
                     signal_array = np.frombuffer(signal_wave, dtype=np.int16)
                     # Audio represents the values in float of each of the n_samples
                     audio, sample_rate = load_audio_file(filename)
-                    # Extracting features from the audiofiles
-                    features=get_MFCC_features(audio, sample_rate)
+                    # Extracting features from the audiofiles (optional, uncomment if needed)
+                    # features=get_MFCC_features(audio, sample_rate)
 
                 # append respective lists of different values determinated above
                 list_n_samples.append(n_samples)
                 list_t_audio.append(t_audio)
                 list_signal_array.append(signal_array)
-                list_extracted_features.append(features)
+                # list_extracted_features.append(features)
 
             # Convert all lists into a column of DataFrame
             df_raw['n_samples'] = list_n_samples
             df_raw['t_audio'] = list_t_audio
             df_raw['signal_array'] = list_signal_array
-            df_raw['MFCC_features'] = list_extracted_features
+            # df_raw['MFCC_features'] = list_extracted_features
 
             # Create an 'Amplitude' column
             mins = df_raw["signal_array"].apply(np.min)
@@ -197,19 +198,19 @@ def cleaned_df(dataset: str) -> pd.DataFrame:
                     # Audio represents the values in float of each of the n_samples
                     audio, sample_rate = load_audio_file(filename)
                     # Extracting features from the audiofiles
-                    features=get_MFCC_features(audio, sample_rate)
+                    # features=get_MFCC_features(audio, sample_rate)
 
                 # append respective lists of different values determinated above
                 list_n_samples.append(n_samples)
                 list_t_audio.append(t_audio)
                 list_signal_array.append(signal_array)
-                list_extracted_features.append(features)
+                # list_extracted_features.append(features)
 
             # Convert all lists into a column of DataFrame
             df_raw['n_samples'] = list_n_samples
             df_raw['t_audio'] = list_t_audio
             df_raw['signal_array'] = list_signal_array
-            df_raw['MFCC_features'] = list_extracted_features
+            # df_raw['MFCC_features'] = list_extracted_features
 
             # Create an 'Amplitude' column
             mins = df_raw["signal_array"].apply(np.min)

@@ -1,3 +1,5 @@
+import numpy as np
+import librosa
 import matplotlib.pyplot as plt
 
 def plot_loss_accuracy(history, title=None):
@@ -29,3 +31,11 @@ def plot_loss_accuracy(history, title=None):
 
     if title:
         fig.suptitle(title)
+
+
+def show_MEL_spectrogram(audio, sample_rate = 16000):
+    mel_spect = librosa.feature.melspectrogram(y=audio, sr=sample_rate, n_fft=512, hop_length=128, center = True, pad_mode = 'symmetric')
+    mel_spect = librosa.power_to_db(mel_spect, ref=np.max)
+    librosa.display.specshow(mel_spect, y_axis='mel', fmax=16000, x_axis='time');
+    plt.title('Mel Spectrogram');
+    plt.colorbar(format='%+2.0f dB');

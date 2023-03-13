@@ -7,7 +7,7 @@ pip
 setuptools
 twine
 wheel
-
+time
 wave
 
 # python and debugging
@@ -34,4 +34,3 @@ uvicorn
 
 # Features extraction and MEL-Spect
 librosa
-librosa.display
