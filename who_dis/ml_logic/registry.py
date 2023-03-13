@@ -9,17 +9,65 @@ from tensorflow import keras
 from who_dis.params import *
 
 def load_audio_file(audiofile_path):
-    '''audio represents the values of each of the n_samples taken at a 16Khz frequency rate
+    '''
+    audio represents the values of each of the n_samples taken at a 16Khz frequency rate
     sample_rate is set to None as to use the native sampling rate
-    mono = True sets the n_channels to 1'''
+    mono = True sets the n_channels to 1
+    '''
     audio, sample_rate = librosa.load(audiofile_path, sr= None, mono = True, offset = 0.0, duration = 6.0, res_type='soxr_hq')
 
     return audio, sample_rate
 
 
 def load_cleaned_df(csv_path):
+    '''
+    Fetch the dataframe containing the main informations about the data.
+    Takes in the filepath where the .csv file containing the dataframe can be found.
+    Returns the dataframe.
+    '''
     df_cleaned = pd.read_csv(csv_path)
     return df_cleaned
+
+def save_preprocessed(MFCC_feat, MEL_spec,target) -> None:
+    '''
+
+    '''
+    # save preprocessed data locally
+    data_path = os.path.join(LOCAL_REGISTRY_PATH, 'prepro_data')
+
+    preprocessed_data = [MFCC_feat, MEL_spec,target]
+    paths = []
+    paths.append(os.path.join(data_path,'MFCC_features.pickle'))
+    paths.append(os.path.join(data_path,'MEL_spectrograms.pickle'))
+    paths.append(os.path.join(data_path, 'labeled_target.pickle'))
+
+    for data,path in zip(preprocessed_data,paths):
+        with open(path) as file:
+            pickle.dump(data,file)
+
+    print("✅ Results saved locally")
+
+    if DATA_TARGET == 'bq':
+        from google.cloud import bigquery
+        client = bigquery.Client()
+        write_mode = "WRITE_TRUNCATE"
+        job_config = bigquery.LoadJobConfig(write_disposition=write_mode)
+
+        MFCC_table = f'{GCP_PROJECT}.{BQ_DATASET}.MFCC_features'
+        MEL_spectrogram_table = f'{GCP_PROJECT}.{BQ_DATASET}.MEL_spectrograms'
+        target_table = f'{GCP_PROJECT}.{BQ_DATASET}.labeled_target'
+
+        job1 = client.load_table_from_dataframe(MFCC_feat, MFCC_table, job_config=job_config)
+        result = job1.result()
+        job2 = client.load_table_from_dataframe(MEL_spec, MEL_spectrogram_table, job_config=job_config)
+        result = job2.result()
+        job3 = client.load_table_from_dataframe(target, target_table, job_config=job_config)
+        result = job3.result()
+
+        print(f"✅ Data saved to bigquery
+
+    return None
+
 
 
 def save_model(model: keras.Model = None) -> None:
@@ -36,33 +84,20 @@ def save_model(model: keras.Model = None) -> None:
 
     print("✅ Model saved locally")
 
+    if MODEL_TARGET == "gcs":
+        # save model in a dedicated gcs bucket
+        from google.cloud import storage
+
+        model_filename = model_path.split("/")[-1] # get timestamp
+        client = storage.Client()
+        bucket = client.bucket(MODEL_BUCKET)
+        blob = bucket.blob(f"models/{model_filename}")
+        blob.upload_from_filename(model_path)
+
+        print("✅ Model saved to gcs")
+        return None
+
     return None
-
-
-def save_results(params: dict, metrics: dict) -> None:
-    """
-    Persist params & metrics locally on hard drive at
-    "{LOCAL_REGISTRY_PATH}/params/{current_timestamp}.pickle"
-    "{LOCAL_REGISTRY_PATH}/metrics/{current_timestamp}.pickle"
-    - (unit 03 only) if MODEL_TARGET='mlflow', also persist them on mlflow
-    """
-
-    timestamp = time.strftime("%Y%m%d-%H%M%S")
-
-    # save params locally
-    if params is not None:
-        params_path = os.path.join(LOCAL_REGISTRY_PATH, "params", timestamp + ".pickle")
-        with open(params_path, "wb") as file:
-            pickle.dump(params, file)
-
-        # save metrics locally
-    if metrics is not None:
-        metrics_path = os.path.join(LOCAL_REGISTRY_PATH, "metrics", timestamp + ".pickle")
-        with open(metrics_path, "wb") as file:
-            pickle.dump(metrics, file)
-
-    print("✅ Results saved locally")
-
 
 def load_model(stage="Production") -> keras.Model:
     """
@@ -87,3 +122,42 @@ def load_model(stage="Production") -> keras.Model:
         print("✅ model loaded from local disk")
 
         return lastest_model
+
+
+    elif MODEL_TARGET == "gcs":
+        from google.cloud import storage
+
+        client = storage.Client()
+        blobs = list(client.get_bucket(MODEL_BUCKET).list_blobs(prefix="model"))
+        latest_blob = max(blobs, key=lambda x: x.updated)
+        latest_model_path_to_save = os.path.join(LOCAL_REGISTRY_PATH, latest_blob.name)
+        latest_blob.download_to_filename(latest_model_path_to_save)
+        lastest_model = keras.models.load_model(latest_model_path_to_save)
+
+        print("✅ Latest model downloaded from cloud storage")
+
+        return lastest_model
+
+def save_results(params: dict, metrics: dict) -> None:
+    """
+    Persist params & metrics locally on hard drive at
+    "{LOCAL_REGISTRY_PATH}/params/{current_timestamp}.pickle"
+    "{LOCAL_REGISTRY_PATH}/metrics/{current_timestamp}.pickle"
+    - (unit 03 only) if MODEL_TARGET='mlflow', also persist them on mlflow
+    """
+
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+
+    # save params locally
+    if params is not None:
+        params_path = os.path.join(LOCAL_REGISTRY_PATH, "params", timestamp + ".pickle")
+        with open(params_path, "wb") as file:
+            pickle.dump(params, file)
+
+        # save metrics locally
+    if metrics is not None:
+        metrics_path = os.path.join(LOCAL_REGISTRY_PATH, "metrics", timestamp + ".pickle")
+        with open(metrics_path, "wb") as file:
+            pickle.dump(metrics, file)
+
+    print("✅ Results saved locally")
