@@ -7,6 +7,7 @@ from sklearn.model_selection import GridSearchCV
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D, Dropout
 from tensorflow.keras.metrics import Recall, Precision
+from who_dis.ml_logic.registry import load_model
 from who_dis.params import *
 
 
@@ -127,7 +128,7 @@ def train_model(model: Model,
 def evaluate_model(model: Model,
                    X_test: np.ndarray,
                    y_test: np.ndarray,
-                   batch_size=int) -> Tuple[Model, dict]:
+                   batch_size: int) -> Tuple[Model, dict]:
 
     """
     Evaluate trained model performance on dataset
@@ -139,8 +140,8 @@ def evaluate_model(model: Model,
         return None
 
     metrics = model.evaluate(
-        X_test=X_test,
-        y_test=y_test,
+        X_test,
+        y_test,
         batch_size=batch_size,
         verbose=1,
         return_dict=True
@@ -154,8 +155,8 @@ def evaluate_model(model: Model,
 
     return metrics
 
-def predict_model(model, X_test):
+def predict_model(model, X_pred):
+    
+    model_prediction = model.predict(X_pred)
 
-   model_prediction = model.predict(X_test)
-
-   return model_prediction
+    return model_prediction

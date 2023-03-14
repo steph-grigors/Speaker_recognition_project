@@ -24,8 +24,8 @@ def preprocess() -> None:
     y_train = OHE_target(cleaned_train)
     y_test = OHE_target(cleaned_test)
 
-    # save_preprocessed(X1_train, X_train, y_train, 'train')
-    # save_preprocessed(X1_test, X_test, y_test, 'test')
+    save_preprocessed(X_train, y_train, 'train')
+    save_preprocessed(X_test, y_test, 'test')
 
     print("✅ preprocess() done \n")
 
@@ -34,8 +34,7 @@ def preprocess() -> None:
 
 def train(X_train, y_train):
 
-    # Train model using `model.py`
-    model = None
+
     # load_model(stage="Production")
     if model is None:
         model = init_baseCNN()
@@ -98,23 +97,24 @@ def pred(audiofile):
 
     audio_pred, sample_rate_pred = load_audio_file(audiofile)
     X_pred = get_MEL_spectrogram(audio_pred, sample_rate_pred)
+    # X_pred = audiofile
 
-    X_pred_df = load_preprocessed('test')
-    columns_names = X_pred_df.columns.tolist()
-    unwanted_columns_names = ['file_path',
-                        'speech',
-                        'speaker',
-                        'n_samples',
-                        't_audio',
-                        'amplitude']
-    classes = [name for name in columns_names if name not in unwanted_columns_names]
+    # X_pred_df = load_preprocessed('test')[0]
+    # columns_names = X_pred_df.columns.tolist()
+    # unwanted_columns_names = ['file_path',
+    #                     'speech',
+    #                     'speaker',
+    #                     'n_samples',
+    #                     't_audio',
+    #                     'amplitude']
+    # classes = [name for name in columns_names if name not in unwanted_columns_names]
     y_pred = model.predict(X_pred)
     name_pred = {classes[np.argmax(y_pred)]}
 
     print("\n✅ prediction done: ", y_pred, y_pred.shape, "\n")
     print(f"\n✅ The person whom voice you heard is: {classes[np.argmax(y_pred)]}" "\n")
 
-    return name_pred, y_pred
+    return y_pred
 
 if __name__ == "__main__":
     pass
