@@ -22,7 +22,7 @@ def init_baseCNN():
     reg_l1_l2 = regularizers.l1_l2(l1=0.005, l2=0.0005)
 
     model = Sequential()
-    model.add(Conv2D(4, (3,3), activation='relu', input_shape=input_shape, activity_regularizer=reg_l1_l2))
+    model.add(Conv2D(4, (3,3), activation='relu', input_shape=(256, 605, 1), activity_regularizer=reg_l1_l2))
     model.add(MaxPool2D(pool_size=(2,2)))
     model.add(Dropout(rate=0.5))
     model.add(Flatten())

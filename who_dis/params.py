@@ -1,6 +1,4 @@
 import os
-from who_dis.ml_logic.data import cleaned_df
-
 
 ##################  VARIABLES  ##################
 
@@ -28,5 +26,3 @@ learning_rate = 0.001
 batch_size=64
 patience=5
 validation_split=0.2
-# Input shape for CNN model
-input_shape = (hop_length, cleaned_df('test')['n_samples'].max() // hop_length, 1)

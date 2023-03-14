@@ -15,7 +15,7 @@ def load_audio_file(audiofile_path):
     mono = True sets the n_channels to 1
     duration can be changed in params but is set to None by default - set the value in seconds if we only need to load  x seconds of the audiofile
     '''
-    audio, sample_rate = librosa.load(audiofile_path, sr= None, mono = True, offset = 0.0, res_type='soxr_hq')
+    audio, sample_rate = librosa.load(audiofile_path, sr= None, mono = True, offset = 0.0, duration = None, res_type='soxr_hq')
 
     return audio, sample_rate
 
@@ -26,6 +26,7 @@ def load_cleaned_df(csv_path):
     Returns the dataframe.
     '''
     df_cleaned = pd.read_csv(csv_path)
+
     return df_cleaned
 
 def save_preprocessed(MFCC_feat, MEL_spec,target,data: str ) -> None:

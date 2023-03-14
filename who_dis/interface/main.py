@@ -23,16 +23,17 @@ def preprocess() -> None:
     y_train = OHE_target(cleaned_train)
     y_test = OHE_target(cleaned_test)
 
-    save_preprocessed(X1_train, X_train, y_train)
-    save_preprocessed(X1_test, X_test, y_test)
+    save_preprocessed(X1_train, X_train, y_train, 'train')
+    save_preprocessed(X1_test, X_test, y_test, 'test')
 
     print("✅ preprocess() done \n")
 
-    return X_train, y_train, X_test, y_test
 
 
-def train(X_train, y_train):
+def train():
 
+    # Load X_train, y_train
+    pass
 
     # Train model using `model.py`
     model = load_model()
