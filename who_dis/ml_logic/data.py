@@ -4,8 +4,9 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from who_dis.ml_logic.registry import load_cleaned_df
-from who_dis.ml_logic.preprocess import get_MFCC_features
-from who_dis.ml_logic.preprocess import load_audio_file
+from who_dis.ml_logic.preprocess import load_audio_file, OHE_target
+from sklearn.preprocessing import OneHotEncoder
+from who_dis.params import *
 
 
 def eda_df(df_raw):
@@ -115,8 +116,7 @@ def cleaned_df(dataset: str) -> pd.DataFrame:
     list_n_samples =[]
     list_t_audio =[]
     list_signal_array=[]
-
-    #Sample_frequency
+    
     sample_rate = 16000
 
     if dataset == 'train':
@@ -163,7 +163,12 @@ def cleaned_df(dataset: str) -> pd.DataFrame:
             mins = df_raw["signal_array"].apply(np.min)
             maxs = df_raw["signal_array"].apply(np.max)
             df_raw['amplitude'] = np.abs(maxs - mins)
-
+            
+            ohe = OneHotEncoder(sparse = False)
+            # Fit encoder
+            ohe.fit(df_raw[['speaker']])
+            # Transform the current "Street" column
+            df_raw[ohe.get_feature_names_out()] = ohe.transform(df_raw[['speaker']])
 
             # Dropping unnecessary columns
             df_cleaned = df_raw.drop(columns=['id', 'signal_array'])
@@ -216,7 +221,12 @@ def cleaned_df(dataset: str) -> pd.DataFrame:
             maxs = df_raw["signal_array"].apply(np.max)
             df_raw['amplitude'] = np.abs(maxs - mins)
 
-
+            ohe = OneHotEncoder(sparse = False)
+            # Fit encoder
+            ohe.fit(df_raw[['speaker']])
+            # Transform the current "Street" column
+            df_raw[ohe.get_feature_names_out()] = ohe.transform(df_raw[['speaker']])
+            
             # Dropping unnecessary columns
             df_cleaned = df_raw.drop(columns=['id', 'signal_array'])
 

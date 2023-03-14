@@ -13,12 +13,12 @@ if os.path.isfile('requirements_dev.txt'):
 
 
 setup(name='who_dis',
-      version="0.0.1",
+      version="0.0.2",
       description="Project Description",
       packages=find_packages(),
       install_requires=requirements,
       test_suite='tests',
       # include_package_data: to install data from MANIFEST.in
       include_package_data=True,
-      scripts=['scripts/who_dis-run'],
+      # scripts=['scripts/who_dis-run'],
       zip_safe=False)
