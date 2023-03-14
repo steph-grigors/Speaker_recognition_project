@@ -26,6 +26,7 @@ seaborn
 # Google Cloud
 google-cloud-bigquery
 google-cloud-storage
+
 python-dotenv
 
 # API

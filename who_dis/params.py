@@ -5,6 +5,7 @@ import os
 GCP_CREDS = os.environ.get("GCP_CREDS")
 GCP_PROJECT = 'speaker_recognition'
 RAW_BUCKET = os.environ.get("RAW_BUCKET")
+
 MODEL_TARGET = 'gcs'
 BQ_DATASET = 'speaker_reco_prepro'
 MODEL_BUCKET = 'speaker_reco_models'
