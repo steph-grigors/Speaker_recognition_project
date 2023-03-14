@@ -2,8 +2,9 @@ import numpy as np
 import pandas as pd
 from who_dis.params import *
 from sklearn.preprocessing import OneHotEncoder
-from who_dis.ml_logic.registry import save_preprocessed, load_preprocessed, load_model, save_model, save_results
+from who_dis.ml_logic.registry import save_preprocessed, load_preprocessed, load_model, save_model, save_results, load_audio_file
 from who_dis.ml_logic.model import init_baseCNN, init_baseCNN, basic_compiler, train_model
+from who_dis.ml_logic.preprocess import get_MEL_spectrogram
 
 
 
@@ -27,7 +28,7 @@ def preprocess() -> None:
     # save_preprocessed(X1_test, X_test, y_test, 'test')
 
     print("✅ preprocess() done \n")
-    
+
     return cleaned_train, cleaned_test, X_train, X_test, y_train, y_test
 
 
@@ -84,7 +85,7 @@ def evaluate(X_test, y_test):
     return metrics
 
 
-def pred(X_pred_index: int) -> np.ndarray:
+def pred(audiofile):
     """
     Make a prediction using the latest trained model
     """
@@ -95,9 +96,11 @@ def pred(X_pred_index: int) -> np.ndarray:
     model = load_model()
     assert model is not None
 
+    audio_pred, sample_rate_pred = load_audio_file(audiofile)
+    X_pred = get_MEL_spectrogram(audio_pred, sample_rate_pred)
+
     X_pred_df = load_preprocessed('test')
-    X_pred = X_pred_df[X_pred_index]
-    columns_names = X_pred.columns.tolist()
+    columns_names = X_pred_df.columns.tolist()
     unwanted_columns_names = ['file_path',
                         'speech',
                         'speaker',
@@ -106,11 +109,12 @@ def pred(X_pred_index: int) -> np.ndarray:
                         'amplitude']
     classes = [name for name in columns_names if name not in unwanted_columns_names]
     y_pred = model.predict(X_pred)
+    name_pred = {classes[np.argmax(y_pred)]}
 
     print("\n✅ prediction done: ", y_pred, y_pred.shape, "\n")
     print(f"\n✅ The person whom voice you heard is: {classes[np.argmax(y_pred)]}" "\n")
 
-    return y_pred
+    return name_pred, y_pred
 
 if __name__ == "__main__":
     pass
