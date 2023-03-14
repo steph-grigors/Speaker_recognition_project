@@ -16,27 +16,26 @@ def preprocess() -> None:
     cleaned_train = cleaned_df(dataset='train')
     cleaned_test = cleaned_df(dataset='test')
 
-    X1_train = MFCC_features_extractor(cleaned_train, dataset='train')
-    X1_test = MFCC_features_extractor(cleaned_test, dataset='test')
+    # X1_train = MFCC_features_extractor(cleaned_train, dataset='train')
+    # X1_test = MFCC_features_extractor(cleaned_test, dataset='test')
     X_train = MEL_spect_features_extractor(cleaned_train, dataset='train')
     X_test = MEL_spect_features_extractor(cleaned_test, dataset='test')
     y_train = OHE_target(cleaned_train)
     y_test = OHE_target(cleaned_test)
 
-    save_preprocessed(X1_train, X_train, y_train, 'train')
-    save_preprocessed(X1_test, X_test, y_test, 'test')
+    # save_preprocessed(X1_train, X_train, y_train, 'train')
+    # save_preprocessed(X1_test, X_test, y_test, 'test')
 
     print("✅ preprocess() done \n")
+    
+    return cleaned_train, cleaned_test, X_train, X_test, y_train, y_test
 
 
-
-def train():
-
-    # Load X_train, y_train
-    pass
+def train(X_train, y_train):
 
     # Train model using `model.py`
-    model = load_model()
+    model = None
+    # load_model(stage="Production")
     if model is None:
         model = init_baseCNN()
         model = basic_compiler(model, learning_rate=learning_rate)
@@ -47,8 +46,8 @@ def train():
                                 validation_split=validation_split)
 
     val_accuracy = np.min(history.history['accuracy'])
-    val_precision = np.min(history.history['precision'])
-    val_recall = np.min(history.history['recall'])
+    # val_precision = np.min(history.history['precision'])
+    # val_recall = np.min(history.history['recall'])
 
     params = dict(
         context="train",
@@ -57,15 +56,14 @@ def train():
 
     # Save results on hard drive using taxifare.ml_logic.registry
     save_results(params=params, metrics=dict(accuracy = val_accuracy,
-                                             precision = val_precision,
-                                             recall = val_recall))
+                                             ))
 
     # Save model weight on hard drive (and optionally on GCS too!)
     save_model(model=model)
 
     print("✅ train() done \n")
 
-    return val_accuracy
+    return history
 
 
 def evaluate(X_test, y_test):

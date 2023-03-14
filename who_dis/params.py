@@ -3,12 +3,12 @@ import os
 ##################  VARIABLES  ##################
 
 GCP_CREDS = os.environ.get("GCP_CREDS")
-GCP_PROJECT = os.environ.get("GCP_PROJECT")
+GCP_PROJECT = 'speaker_recognition'
 RAW_BUCKET = os.environ.get("RAW_BUCKET")
-MODEL_TARGET = os.environ.get('MODEL_TARGET')
-BQ_DATASET = os.environ.get('BQ_DATASET')
-MODEL_BUCKET = os.environ.get('MODEL_BUCKET')
-DATA_TARGET = os.environ.get("DATA_TARGET")
+MODEL_TARGET = 'gcs'
+BQ_DATASET = 'speaker_reco_prepro'
+MODEL_BUCKET = 'speaker_reco_models'
+DATA_TARGET = 'bq'
 
 ##################  PATHS  ##################
 LOCAL_REGISTRY_PATH = os.path.abspath(os.path.dirname(os.getcwd()))
@@ -26,3 +26,4 @@ learning_rate = 0.001
 batch_size=64
 patience=5
 validation_split=0.2
+

@@ -22,9 +22,9 @@ def init_baseCNN():
     reg_l1_l2 = regularizers.l1_l2(l1=0.005, l2=0.0005)
 
     model = Sequential()
-    model.add(Conv2D(4, (3,3), activation='relu', input_shape=(256, 605, 1), activity_regularizer=reg_l1_l2))
+    model.add(Conv2D(4, (3,3), activation='relu', input_shape=(128, 606, 1), activity_regularizer=reg_l1_l2))
     model.add(MaxPool2D(pool_size=(2,2)))
-    model.add(Dropout(rate=0.5))
+    model.add(Dropout(rate=0.4))
     model.add(Flatten())
     model.add(Dense(18, activation='softmax'))
 
@@ -114,7 +114,7 @@ def train_model(model: Model,
 
     history = model.fit(X_train, y_train,
           batch_size=batch_size, # Batch size -too small--> no generalization
-          epochs=5,    #            -too large--> slow computations
+          epochs=10,    #            -too large--> slow computations
           validation_split=validation_split,
           callbacks=[es],
           verbose=1)
