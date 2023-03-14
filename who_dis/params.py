@@ -7,6 +7,7 @@ GCP_CREDS = os.environ.get("GCP_CREDS")
 GCP_PROJECT = os.environ.get("GCP_PROJECT")
 RAW_BUCKET = os.environ.get("RAW_BUCKET")
 MODEL_TARGET = os.environ.get('MODEL_TARGET')
+DATA_TARGET = os.environ.get("DATA_TARGET")
 
 ##################  PREPROCESSING  ##################
 sample_rate = 16000
