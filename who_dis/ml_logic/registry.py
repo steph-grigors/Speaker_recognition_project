@@ -164,3 +164,28 @@ def save_results(params: dict, metrics: dict) -> None:
             pickle.dump(metrics, file)
 
     print("✅ Results saved locally")
+
+def save_ASR_input(ASR_input,dataset: str):
+    from google.cloud import bigquery
+    TABLE = f"ASR_df_{dataset}"
+    table = f'{GCP_PROJECT}.{BQ_DATASET}.{TABLE}'
+    client = bigquery.Client()
+    write_mode = "WRITE_TRUNCATE"
+    job_config = bigquery.LoadJobConfig(write_disposition=write_mode)
+    job = client.load_table_from_dataframe(ASR_input, table, job_config=job_config)
+    result = job.result()
+    return None
+
+def load_ASR_input(dataset: str):
+    from google.cloud import bigquery
+    TABLE = f"ASR_df_{dataset}"
+    query = f"""
+            SELECT *
+            FROM {GCP_PROJECT}.{BQ_DATASET}.{TABLE}
+            """
+    client = bigquery.Client(project=GCP_PROJECT)
+    query_job = client.query(query)
+    result = query_job.result()
+    df = result.to_dataframe()
+
+    return df
