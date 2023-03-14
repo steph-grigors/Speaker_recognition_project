@@ -8,13 +8,15 @@ import librosa
 from tensorflow import keras
 from who_dis.params import *
 
+
 def load_audio_file(audiofile_path):
     '''
     audio represents the values of each of the n_samples taken at a 16Khz frequency rate
     sample_rate is set to None as to use the native sampling rate
     mono = True sets the n_channels to 1
+    duration can be changed in params but is set to None by default - set the value in seconds if we only need to load  x seconds of the audiofile
     '''
-    audio, sample_rate = librosa.load(audiofile_path, sr= None, mono = True, offset = 0.0, duration = 6.0, res_type='soxr_hq')
+    audio, sample_rate = librosa.load(audiofile_path, sr= None, mono = True, offset = 0.0, duration = None, res_type='soxr_hq')
 
     return audio, sample_rate
 
@@ -25,6 +27,7 @@ def load_cleaned_df(csv_path):
     Returns the dataframe.
     '''
     df_cleaned = pd.read_csv(csv_path)
+
     return df_cleaned
 
 def save_preprocessed(MFCC_feat, MEL_spec,target,data: str ) -> None:
@@ -33,22 +36,24 @@ def save_preprocessed(MFCC_feat, MEL_spec,target,data: str ) -> None:
     Takes in the MFCC features, the MEL spectrograms, and the target labels.
     It also takes in a string which is to be set as 'train' or 'test'
     '''
-    # save preprocessed data locally
-    data_path = os.path.join(LOCAL_REGISTRY_PATH, 'prepro_data')
+    
+    if DATA_TARGET == 'local':
+        # save preprocessed data locally
+        data_path = os.path.join(LOCAL_REGISTRY_PATH, 'prepro_data')
 
-    preprocessed_data = [MFCC_feat, MEL_spec,target]
-    paths = []
-    paths.append(os.path.join(data_path,f'MFCC_features_{data}.pickle'))
-    paths.append(os.path.join(data_path,f'MEL_spectrograms_{data}.pickle'))
-    paths.append(os.path.join(data_path, f'labeled_target_{data}.pickle'))
+        preprocessed_data = [MFCC_feat, MEL_spec,target]
+        paths = []
+        paths.append(os.path.join(data_path,f'MFCC_features_{data}.pickle'))
+        paths.append(os.path.join(data_path,f'MEL_spectrograms_{data}.pickle'))
+        paths.append(os.path.join(data_path, f'labeled_target_{data}.pickle'))
 
-    for data,path in zip(preprocessed_data,paths):
-        with open(path) as file:
-            pickle.dump(data,file)
+        for data,path in zip(preprocessed_data,paths):
+            with open(path) as file:
+                pickle.dump(data,file)
 
-    print("✅ Results saved locally")
+        print("✅ Results saved locally")
 
-    if DATA_TARGET == 'bq':
+    elif DATA_TARGET == 'bq':
         from google.cloud import bigquery
         client = bigquery.Client()
         write_mode = "WRITE_TRUNCATE"
