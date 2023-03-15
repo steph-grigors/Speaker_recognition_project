@@ -3,7 +3,7 @@ import numpy as np
 import librosa
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
-from who_dis.ml_logic.registry import load_audio_file
+from who_dis.ml_logic.registry import load_audio_file, save_ASR_input
 from who_dis.params import *
 
 
@@ -112,19 +112,35 @@ def MEL_spect_features_extractor(clean_df, dataset = 'train'):
         return X_test
 
 
+def get_ASR_input(clean_df, dataset: str):
+    assert dataset == 'train' or dataset == 'test'
+    dir_path = os.path.dirname(os.getcwd())
+    if dataset == 'train':
+        tmp = []
+        train_set = os.path.join(dir_path,'raw_data/')
+        for index, row in clean_df.iterrows():
+            print(f'Extracting audio files # {index} / {len(clean_df)}', end='\r')
+            audiofile_path = train_set + row['file_path']
+            audio, sr = load_audio_file(audiofile_path)
+            tmp.append(audio)
 
+        ASR_input = pd.DataFrame(clean_df['speech'])
+        ASR_input['audio'] = tmp
+        save_ASR_input(ASR_input,'train')
 
-###########################################################################################################
+        return ASR_input
 
-# def clipping_unbalanced_classes(df_cleaned):
-#     '''Checks for the number of observations per target class and clips
-#     the audio files in 2 clips if values_count of that class < max(values_count))'''
+    if dataset == 'test':
+        tmp = []
+        test_set = os.path.join(dir_path,'raw_data/')
+        for index, row in clean_df.iterrows():
+            print(f'Extracting audio files # {index} / {len(clean_df)}', end='\r')
+            audiofile_path = test_set + row['file_path']
+            audio, sr = load_audio_file(audiofile_path)
+            tmp.append(audio)
 
-#     for num_recordings in df_cleaned.speaker.value_counts(normalize = True):
-#         if num_recordings > df_cleaned.speaker.value_counts().max() // 2:
-#             pass #clip the audio file in 2 windows'''
-###########################################################################################################
+        ASR_input = pd.DataFrame(clean_df['speech'])
+        ASR_input['audio'] = tmp
+        save_ASR_input(ASR_input,'test')
 
-# def trim_recordings():
-#     pass
-###########################################################################################################
+        return ASR_input
