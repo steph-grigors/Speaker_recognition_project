@@ -12,7 +12,8 @@ BQ_DATASET = 'speaker_reco_prepro'
 DATA_TARGET = 'bq'
 
 ##################  PATHS  ##################
-LOCAL_REGISTRY_PATH = os.path.abspath(os.path.dirname(os.getcwd()))
+LOCAL_REGISTRY_PATH = os.path.abspath(os.getcwd())
+# LOCAL_REGISTRY_PATH = os.path.abspath(os.path.dirname(os.getcwd()))
 
 ##################  PREPROCESSING  ##################
 
