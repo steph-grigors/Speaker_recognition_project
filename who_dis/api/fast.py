@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 import requests
+from who_dis.interface.main import pred
+from tensorflow.io import read_file
+from tensorflow.audio import decode_wav
 
 ###################### / ######################
 
@@ -14,8 +17,11 @@ def index():
 #ex : http://localhost:8000/predict?day_of_week=0&time=14
 
 @app.get('/predict')
-def predict(day_of_week, time):
+def predict(sound):
     # Compute `wait_prediction` from `day_of_week` and `time`
-    wait_prediction = int(day_of_week) * int(time)
+    coded_wav = read_file(sound)
+    plot_sound = decode_wav(coded_wav)
 
-    return {'wait': wait_prediction}
+    # type()
+
+    return {'wait': plot_sound}
