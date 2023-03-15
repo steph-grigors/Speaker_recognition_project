@@ -19,10 +19,10 @@ def plot_loss_accuracy(history, title=None):
 
     # --- ACCURACY
 
-    ax[1].plot(history.history['accuracy'])
-    ax[1].plot(history.history['val_accuracy'])
-    ax[1].set_title('Model Accuracy')
-    ax[1].set_ylabel('Accuracy')
+    ax[1].plot(history.history['categorical_accuracy'])
+    ax[1].plot(history.history['val_categorical_accuracy'])
+    ax[1].set_title('Model Categorical Accuracy')
+    ax[1].set_ylabel('Categorical_accuracy')
     ax[1].set_xlabel('Epoch')
     ax[1].legend(['Train', 'Test'], loc='best')
     ax[1].set_ylim((0,1))

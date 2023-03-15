@@ -172,7 +172,9 @@ def cleaned_df(dataset: str) -> pd.DataFrame:
 
             # Dropping unnecessary columns
             df_cleaned = df_raw.drop(columns=['id', 'signal_array'])
+            df_cleaned.reset_index(drop = True)
 
+            
         # Save the file locally for future usage
         df_cleaned.to_csv(cleaned_train_csv_path)
 
@@ -229,6 +231,7 @@ def cleaned_df(dataset: str) -> pd.DataFrame:
             
             # Dropping unnecessary columns
             df_cleaned = df_raw.drop(columns=['id', 'signal_array'])
+            df_cleaned.reset_index(drop = True)
 
         # Save the file locally for future usage
         df_cleaned.to_csv(cleaned_test_csv_path)
