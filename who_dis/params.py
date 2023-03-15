@@ -12,7 +12,8 @@ DATA_TARGET = 'gcs'
 PREPRO_BUCKET = 'speaker_reco_prepro'
 
 ##################  PATHS  ##################
-LOCAL_REGISTRY_PATH = os.path.abspath(os.path.dirname(os.getcwd()))
+LOCAL_REGISTRY_PATH = os.path.abspath(os.getcwd())
+# LOCAL_REGISTRY_PATH = os.path.abspath(os.path.dirname(os.getcwd()))
 
 ##################  PREPROCESSING  ##################
 
@@ -27,4 +28,3 @@ learning_rate = 0.001
 batch_size=64
 patience=5
 validation_split=0.2
-
