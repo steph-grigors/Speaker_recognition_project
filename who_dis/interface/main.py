@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from who_dis.params import *
 from sklearn.preprocessing import OneHotEncoder
+from who_dis.ml_logic.data import cleaned_df
 from who_dis.ml_logic.registry import save_preprocessed, load_preprocessed, load_model, save_model, save_results, load_audio_file
 from who_dis.ml_logic.model import init_baseCNN, init_baseCNN, basic_compiler, train_model
 from who_dis.ml_logic.preprocess import get_MEL_spectrogram
@@ -24,8 +25,8 @@ def preprocess() -> None:
     y_train = OHE_target(cleaned_train)
     y_test = OHE_target(cleaned_test)
 
-    # save_preprocessed(X1_train, X_train, y_train, 'train')
-    # save_preprocessed(X1_test, X_test, y_test, 'test')
+    save_preprocessed(X_train, y_train, 'train')
+    save_preprocessed(X_test, y_test, 'test')
 
     print("✅ preprocess() done \n")
 
@@ -34,21 +35,23 @@ def preprocess() -> None:
 
 def train(X_train, y_train):
 
-    # Train model using `model.py`
     model = None
-    # load_model(stage="Production")
+    # load_model()
     if model is None:
         model = init_baseCNN()
-        model = basic_compiler(model, learning_rate=learning_rate)
+        model = basic_compiler(model, learning_rate=0.01)
 
-    model, history = train_model(model, X_train, y_train,
-                                batch_size=batch_size,
-                                patience=patience,
-                                validation_split=validation_split)
+    model, history = train_model(model, 
+                                 X_train, 
+                                 y_train,
+                                batch_size=32,
+                                epochs=50,
+                                patience=10,
+                                validation_split=0.2)
 
-    val_accuracy = np.min(history.history['accuracy'])
-    # val_precision = np.min(history.history['precision'])
-    # val_recall = np.min(history.history['recall'])
+    val_categorical_accuracy = np.mean(history.history['val_categorical_accuracy'])
+    val_precision = np.mean(history.history['val_precision'])
+    val_recall = np.mean(history.history['val_recall'])
 
     params = dict(
         context="train",
@@ -56,7 +59,9 @@ def train(X_train, y_train):
     )
 
     # Save results on hard drive using taxifare.ml_logic.registry
-    save_results(params=params, metrics=dict(accuracy = val_accuracy,
+    save_results(params=params, metrics=dict(accuracy = val_categorical_accuracy,
+                                             precision = val_recall,
+                                             recall = val_recall
                                              ))
 
     # Save model weight on hard drive (and optionally on GCS too!)
@@ -78,7 +83,7 @@ def evaluate(X_test, y_test):
 
     model = load_model()
     assert model is not None
-    metrics = evaluate_model(model, X_test, y_test, batch_size=batch_size)
+    metrics = evaluate_model(model, X_test, y_test, batch_size=32)
 
     print("✅ evaluate() done \n")
 
@@ -95,26 +100,40 @@ def pred(audiofile):
 
     model = load_model()
     assert model is not None
-
+    
+    # Preprocessing the audiofile
     audio_pred, sample_rate_pred = load_audio_file(audiofile)
     X_pred = get_MEL_spectrogram(audio_pred, sample_rate_pred)
+    X_pred = X_pred.reshape((-1,128,606,1))
 
-    X_pred_df = load_preprocessed('test')
-    columns_names = X_pred_df.columns.tolist()
-    unwanted_columns_names = ['file_path',
-                        'speech',
-                        'speaker',
-                        'n_samples',
-                        't_audio',
-                        'amplitude']
-    classes = [name for name in columns_names if name not in unwanted_columns_names]
+    speaker_names = {0: 'Andrew',
+                     1: 'Maximilian',
+                     2: 'Parul',
+                     3: 'Mike',
+                     4: 'Arya',
+                     5: 'Henry',
+                     6: 'Chloe',
+                     7: 'Laura',
+                     8: 'Samuel',
+                     9: 'Krish',
+                     10: 'Jim',
+                     11: 'Alex',
+                     12: 'Kalindi',
+                     13: 'Elena',
+                     14: 'Walter White',
+                     15: 'Jules',
+                     16: 'Pascaline',
+                     17: 'Kamilla'}
+                               
+                     
+    # Computing y_pred and the speaker's name
     y_pred = model.predict(X_pred)
-    name_pred = {classes[np.argmax(y_pred)]}
+    name_pred = speaker_names[np.argmax(y_pred)]
 
-    print("\n✅ prediction done: ", y_pred, y_pred.shape, "\n")
-    print(f"\n✅ The person whom voice you heard is: {classes[np.argmax(y_pred)]}" "\n")
+    print(f"\n✅ prediction done: {y_pred} \n")
+    print(f"\n✅ The person whom voice you heard is: {name_pred} \n")
 
-    return name_pred, y_pred
+    return y_pred, name_pred
 
 if __name__ == "__main__":
     pass
