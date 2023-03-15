@@ -36,19 +36,20 @@ def preprocess() -> None:
 def train(X_train, y_train):
 
     model = None
-    # load_model(stage="Production")
+    # load_model()
     if model is None:
         model = init_baseCNN()
-        model = basic_compiler(model, learning_rate=learning_rate)
+        model = basic_compiler(model, learning_rate=0.01)
 
     model, history = train_model(model, 
                                  X_train, 
                                  y_train,
                                 batch_size=32,
+                                epochs=50,
                                 patience=10,
                                 validation_split=0.2)
 
-    val_accuracy = np.mean(history.history['val_accuracy'])
+    val_categorical_accuracy = np.mean(history.history['val_categorical_accuracy'])
     val_precision = np.mean(history.history['val_precision'])
     val_recall = np.mean(history.history['val_recall'])
 
@@ -58,7 +59,7 @@ def train(X_train, y_train):
     )
 
     # Save results on hard drive using taxifare.ml_logic.registry
-    save_results(params=params, metrics=dict(accuracy = val_accuracy,
+    save_results(params=params, metrics=dict(accuracy = val_categorical_accuracy,
                                              precision = val_recall,
                                              recall = val_recall
                                              ))

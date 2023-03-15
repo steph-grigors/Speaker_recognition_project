@@ -6,7 +6,7 @@ from keras import Model, regularizers, optimizers, callbacks
 from sklearn.model_selection import GridSearchCV
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D, Dropout
-from tensorflow.keras.metrics import Recall, Precision
+from tensorflow.keras.metrics import Recall, Precision, CategoricalAccuracy
 from who_dis.ml_logic.registry import load_model
 from who_dis.params import *
 
@@ -20,7 +20,7 @@ def init_baseCNN():
     '''
     # reg_l1 = regularizers.L1(0.01)
     # reg_l2 = regularizers.L2(0.01)
-    reg_l1_l2 = regularizers.l1_l2(l1=0.005, l2=0.0005)
+    reg_l1_l2 = regularizers.l1_l2(l1=0.01, l2=0.01)
 
     model = Sequential()
     model.add(Conv2D(4, (3,3), activation='relu', input_shape=(128, 606, 1), activity_regularizer=reg_l1_l2))
@@ -48,7 +48,7 @@ def init_baseNN():
     return model
 
 def basic_compiler(model: Model,
-                   learning_rate=0.01) -> Model:
+                   learning_rate) -> Model:
     '''
     This function takes in a model, compiles it and returns the compiled model.
     Compiler parameters:
@@ -65,7 +65,7 @@ def basic_compiler(model: Model,
     optimizer = optimizers.Adam(learning_rate=lr_schedule)
     model.compile(optimizer=optimizer,
                  loss='categorical_crossentropy',
-                 metrics=['accuracy', Recall(), Precision()])
+                 metrics=[CategoricalAccuracy(), Recall(), Precision()])
 
     print("✅ model compiled")
 
@@ -77,7 +77,8 @@ def grid_search(model: Model,
 
     # Hyperparameter Grid
     grid = {
-        'l1_ratio': [0.2, 0.5, 0.8],
+        'l1_ratio': [0.001, 0.01],
+        'l2_ratio': [0.001, 0.01],
         'learning_rate': [0.001, 0.01, 0.1],
         'batch_size': [16, 32, 64, 128],
         'epochs': [5, 10, 20]
@@ -87,7 +88,8 @@ def grid_search(model: Model,
     search = GridSearchCV(
         model,
         grid,
-        scoring = ['accuracy', 'precision', 'recall'],
+        refit = False,
+        scoring = CategoricalAccuracy(),
         cv = 10,
         n_jobs=-1
     )
@@ -102,6 +104,7 @@ def train_model(model: Model,
                 X_train: np.ndarray,
                 y_train: np.ndarray,
                 batch_size,
+                epochs,
                 patience,
                 validation_split) -> Tuple[Model, dict]:
     """
@@ -116,7 +119,7 @@ def train_model(model: Model,
     history = model.fit(X_train,
                         y_train,
                       batch_size=batch_size, # !! if batch size -too small--> no generalization
-                      epochs=6,    #            
+                      epochs=epochs,    #            
                       validation_split=validation_split,
                       callbacks=[es],
                       verbose=1)
