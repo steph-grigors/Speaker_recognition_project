@@ -16,11 +16,11 @@ LOCAL_REGISTRY_PATH = os.path.abspath(os.path.dirname(os.getcwd()))
 
 ##################  PREPROCESSING  ##################
 
-duration = None
-sample_rate = 16000
-n_fft = 512
-hop_length = 256
-n_mels = 128
+# duration = None
+# sample_rate = 16000
+# n_fft = 512
+# hop_length = 256
+# n_mels = 128
 
 ##################  TRAIN_MODEL  ##################
 learning_rate = 0.001

@@ -18,8 +18,8 @@ def init_baseCNN():
     - 1 Flatten layer
     - 1 Dense output layer with 18 neurons, activation "softmax"
     '''
-    reg_l1 = regularizers.L1(0.01)
-    reg_l2 = regularizers.L2(0.01)
+    # reg_l1 = regularizers.L1(0.01)
+    # reg_l2 = regularizers.L2(0.01)
     reg_l1_l2 = regularizers.l1_l2(l1=0.005, l2=0.0005)
 
     model = Sequential()
@@ -48,7 +48,7 @@ def init_baseNN():
     return model
 
 def basic_compiler(model: Model,
-                   learning_rate=learning_rate) -> Model:
+                   learning_rate=0.01) -> Model:
     '''
     This function takes in a model, compiles it and returns the compiled model.
     Compiler parameters:
@@ -59,7 +59,7 @@ def basic_compiler(model: Model,
     '''
     lr_schedule = keras.optimizers.schedules.ExponentialDecay(
                                                 initial_learning_rate=learning_rate,
-                                                decay_steps=10000,
+                                                decay_steps=100,
                                                 decay_rate=0.9)
 
     optimizer = optimizers.Adam(learning_rate=lr_schedule)
@@ -87,7 +87,7 @@ def grid_search(model: Model,
     search = GridSearchCV(
         model,
         grid,
-        scoring = 'accuracy',
+        scoring = ['accuracy', 'precision', 'recall'],
         cv = 10,
         n_jobs=-1
     )
@@ -101,9 +101,9 @@ def grid_search(model: Model,
 def train_model(model: Model,
                 X_train: np.ndarray,
                 y_train: np.ndarray,
-                batch_size=batch_size,
-                patience=patience,
-                validation_split=validation_split) -> Tuple[Model, dict]:
+                batch_size,
+                patience,
+                validation_split) -> Tuple[Model, dict]:
     """
     Fit model and return a the tuple (fitted_model, history)
     """
@@ -113,12 +113,13 @@ def train_model(model: Model,
                                  patience=patience,
                                  restore_best_weights=True)
 
-    history = model.fit(X_train, y_train,
-          batch_size=batch_size, # Batch size -too small--> no generalization
-          epochs=10,    #            -too large--> slow computations
-          validation_split=validation_split,
-          callbacks=[es],
-          verbose=1)
+    history = model.fit(X_train,
+                        y_train,
+                      batch_size=batch_size, # !! if batch size -too small--> no generalization
+                      epochs=6,    #            
+                      validation_split=validation_split,
+                      callbacks=[es],
+                      verbose=1)
 
     print(f"✅ model trained on {len(X_train)} rows")
 
