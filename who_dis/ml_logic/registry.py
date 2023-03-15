@@ -39,17 +39,23 @@ def save_preprocessed(X,y,data: str ) -> None:
     # save preprocessed data locally
     data_path = os.path.join(LOCAL_REGISTRY_PATH, 'prepro_data')
 
-    X_filename = os.path.join(data_path,f'{data}/X_{data}.pickle')
-    y_filename = os.path.join(data_path, f'{data}/y_{data}.pickle')
-    pickle.dump(X,X_filename)
-    pickle.dump(y,y_filename)
+    if DATA_TARGET == 'local':    
+        X_filename = os.path.join(data_path,f'{data}/X_{data}.pickle')
+        y_filename = os.path.join(data_path, f'{data}/y_{data}.pickle')
+        with open(X_filename, 'wb') as handle:
+            pickle.dump(X,handle, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(y_filename, 'wb') as handle:
+            pickle.dump(y,handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    print("✅ Results saved locally")
+        print("✅ Results saved locally")
 
     if DATA_TARGET == 'gcs':
         from google.cloud import storage
         client = storage.Client()
         bucket = client.bucket(PREPRO_BUCKET)
+        
+        X_filename = os.path.join(data_path,f'{data}/X_{data}.pickle')
+        y_filename = os.path.join(data_path, f'{data}/y_{data}.pickle')
 
         Xblob = bucket.blob(f'{data}/X_{data}')
         Xblob.upload_from_filename(X_filename)
@@ -69,8 +75,8 @@ def load_preprocessed(data: str):
     data_path = os.path.join(LOCAL_REGISTRY_PATH, 'prepro_data')
     X_filename = os.path.join(data_path,f'{data}/X_{data}.pickle')
     y_filename = os.path.join(data_path, f'{data}/y_{data}.pickle')
-    X = pickle.load(X_filename)
-    y = pickle.load(y_filename)
+    X = pickle.load(open(X_filename, 'rb'))
+    y = pickle.load(open(y_filename, 'rb'))
 
     return X, y
 
