@@ -40,7 +40,7 @@ def save_preprocessed(X,y,data: str ) -> None:
     # save preprocessed data locally
     data_path = os.path.join(LOCAL_REGISTRY_PATH, 'prepro_data')
 
-    if DATA_TARGET == 'local':    
+    if DATA_TARGET == 'local':
         X_filename = os.path.join(data_path,f'{data}/X_{data}.pickle')
         y_filename = os.path.join(data_path, f'{data}/y_{data}.pickle')
         with open(X_filename, 'wb') as handle:
@@ -54,7 +54,7 @@ def save_preprocessed(X,y,data: str ) -> None:
         from google.cloud import storage
         client = storage.Client()
         bucket = client.bucket(PREPRO_BUCKET)
-        
+
         X_filename = os.path.join(data_path,f'{data}/X_{data}.pickle')
         y_filename = os.path.join(data_path, f'{data}/y_{data}.pickle')
 
@@ -173,6 +173,10 @@ def save_results(params: dict, metrics: dict) -> None:
     print("✅ Results saved locally")
 
 def save_ASR_input(ASR_input,dataset: str):
+    '''
+    This function saves a dataframe to BQ with the intent to use it as input for the ASR model.
+    Takes in a string identifying which dataset to process 'train' or 'test'
+    '''
     from google.cloud import bigquery
     TABLE = f"ASR_df_{dataset}"
     table = f'{GCP_PROJECT}.{BQ_DATASET}.{TABLE}'
@@ -185,6 +189,10 @@ def save_ASR_input(ASR_input,dataset: str):
     return None
 
 def load_ASR_input(dataset: str):
+    '''
+    This function loads a dataframe from BQ with the intent to use eventually use it as input for the ASR model.
+    Takes in a string identifying which dataset to load 'train' or 'test'
+    '''
     from google.cloud import bigquery
     TABLE = f"ASR_df_{dataset}"
     query = f"""

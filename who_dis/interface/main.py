@@ -10,16 +10,20 @@ from who_dis.ml_logic.preprocess import get_MEL_spectrogram
 
 
 def preprocess() -> None:
-
+    '''
+    Original preprocessing intended to save the preprocessed data in a GCS bucket.
+    The form of the preprocessed data is:
+        - an X which is a MEL spectrogram of the audiofile.
+        - a One Hot Encoded y which identifies the speaker.
+    Returns cleaned_train, cleaned_test, X_train, X_test, y_train, y_test
+    '''
     from who_dis.ml_logic.data import cleaned_df
-    from who_dis.ml_logic.preprocess import MFCC_features_extractor, MEL_spect_features_extractor, OHE_target
+    from who_dis.ml_logic.preprocess import MEL_spect_features_extractor, OHE_target
 
     # Process data
     cleaned_train = cleaned_df(dataset='train')
     cleaned_test = cleaned_df(dataset='test')
 
-    # X1_train = MFCC_features_extractor(cleaned_train, dataset='train')
-    # X1_test = MFCC_features_extractor(cleaned_test, dataset='test')
     X_train = MEL_spect_features_extractor(cleaned_train, dataset='train')
     X_test = MEL_spect_features_extractor(cleaned_test, dataset='test')
     y_train = OHE_target(cleaned_train)
@@ -34,15 +38,18 @@ def preprocess() -> None:
 
 
 def train(X_train, y_train):
-
+    '''
+    This function trains a new CNN instance with the input: X_train, y_train
+    Returns the history (output of the model.fit()).
+    '''
     model = None
     # load_model()
     if model is None:
         model = init_baseCNN()
         model = basic_compiler(model, learning_rate=0.01)
 
-    model, history = train_model(model, 
-                                 X_train, 
+    model, history = train_model(model,
+                                 X_train,
                                  y_train,
                                 batch_size=32,
                                 epochs=50,
@@ -74,8 +81,8 @@ def train(X_train, y_train):
 
 def evaluate(X_test, y_test):
     """
-    Evaluate the performance of the latest production model on processed data
-    Returns accuracy, recall, precision
+    Evaluate the performance of the latest production model on processed data.
+    Returns accuracy, recall, precision.
     """
 
     from who_dis.ml_logic.registry import load_model
@@ -92,7 +99,7 @@ def evaluate(X_test, y_test):
 
 def pred(audiofile):
     """
-    Make a prediction using the latest trained model
+    Make a prediction using the latest trained model.
     """
     from who_dis.ml_logic.registry import load_model
 
@@ -100,7 +107,7 @@ def pred(audiofile):
 
     model = load_model()
     assert model is not None
-    
+
     # Preprocessing the audiofile
     audio_pred, sample_rate_pred = load_audio_file(audiofile)
     X_pred = get_MEL_spectrogram(audio_pred, sample_rate_pred)
@@ -124,14 +131,14 @@ def pred(audiofile):
                      15: 'Jules',
                      16: 'Pascaline',
                      17: 'Kamilla'}
-                               
-                     
+
+
     # Computing y_pred and the speaker's name
     y_pred = model.predict(X_pred)
     name_pred = speaker_names[np.argmax(y_pred)]
 
     print(f"\n✅ prediction done: {y_pred} \n")
-    print(f"\n✅ The person whom voice you heard is: {name_pred} \n")
+    print(f"\n✅ The person whose voice you heard is: {name_pred} \n")
 
     return y_pred, name_pred
 
