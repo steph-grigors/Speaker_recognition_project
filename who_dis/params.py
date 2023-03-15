@@ -2,7 +2,7 @@ import os
 
 ##################  VARIABLES  ##################
 
-GCP_CREDS = os.environ.get("GCP_CREDS")
+GOOGLE_APPLICATION_CREDENTIALS = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
 GCP_PROJECT = os.environ.get("GCP_PROJECT")
 RAW_BUCKET = os.environ.get("RAW_BUCKET")
 MODEL_BUCKET = os.environ.get("MODEL_BUCKET")

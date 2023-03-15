@@ -7,6 +7,7 @@ from colorama import Fore, Style
 import librosa
 from tensorflow import keras
 from who_dis.params import *
+import google.auth
 
 
 def load_audio_file(audiofile_path):
@@ -169,7 +170,8 @@ def save_ASR_input(ASR_input,dataset: str):
     from google.cloud import bigquery
     TABLE = f"ASR_df_{dataset}"
     table = f'{GCP_PROJECT}.{BQ_DATASET}.{TABLE}'
-    client = bigquery.Client()
+    credentials, project = google.auth.default()
+    client = bigquery.Client(project,credentials)
     write_mode = "WRITE_TRUNCATE"
     job_config = bigquery.LoadJobConfig(write_disposition=write_mode)
     job = client.load_table_from_dataframe(ASR_input, table, job_config=job_config)
@@ -183,7 +185,8 @@ def load_ASR_input(dataset: str):
             SELECT *
             FROM {GCP_PROJECT}.{BQ_DATASET}.{TABLE}
             """
-    client = bigquery.Client(project=GCP_PROJECT)
+    credentials, project = google.auth.default()
+    client = bigquery.Client(str(project),str(credentials))
     query_job = client.query(query)
     result = query_job.result()
     df = result.to_dataframe()
