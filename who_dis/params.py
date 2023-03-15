@@ -28,4 +28,3 @@ learning_rate = 0.001
 batch_size=64
 patience=5
 validation_split=0.2
-
