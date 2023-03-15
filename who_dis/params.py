@@ -2,14 +2,16 @@ import os
 
 ##################  VARIABLES  ##################
 
-GCP_CREDS = os.environ.get("GCP_CREDS")
-GCP_PROJECT = 'speaker_recognition'
+GOOGLE_APPLICATION_CREDENTIALS = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+GCP_PROJECT = os.environ.get("GCP_PROJECT")
 RAW_BUCKET = os.environ.get("RAW_BUCKET")
+
+MODEL_BUCKET = os.environ.get("MODEL_BUCKET")
+PREPRO_BUCKET = os.environ.get('PREPRO_BUCKET')
 MODEL_TARGET = 'gcs'
-BQ_DATASET = 'speaker_reco_prepro'
-MODEL_BUCKET = 'speaker_reco_models'
-DATA_TARGET = 'gcs'
-PREPRO_BUCKET = 'speaker_reco_prepro'
+BQ_DATASET = os.environ.get("BQ_DATASET")
+DATA_TARGET = 'bq'
+
 
 ##################  PATHS  ##################
 LOCAL_REGISTRY_PATH = os.path.abspath(os.getcwd())
