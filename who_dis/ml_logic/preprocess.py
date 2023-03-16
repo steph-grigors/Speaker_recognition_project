@@ -9,7 +9,10 @@ from who_dis.params import *
 
 
 def OHE_target(clean_df):
-
+    '''
+    This function takes in the DataFrame with information about our data.
+    Return the One Hot Encoded target from the 'speaker' column of that DataFrame.
+    '''
     # Instantiate the OneHotEncoder
     ohe = OneHotEncoder(sparse = False)
     # Fit encoder
@@ -33,6 +36,10 @@ def get_MFCC_features(audio, sample_rate=16000):
 
 
 def get_MEL_spectrogram(audio, sample_rate=16000):
+    '''
+    This function computes the MEL spectrogram from an audio file.
+    The output is a MEL spectrogram image.
+    '''
     mel_spect = librosa.feature.melspectrogram(y=audio, sr=sample_rate, n_fft=512, hop_length=256, n_mels=128, center = True, pad_mode = 'symmetric')
     mel_spect = np.expand_dims(mel_spect, axis = 2)
     mel_spect = librosa.util.pad_center(mel_spect, size = 606, axis = 1)
@@ -77,7 +84,10 @@ def MFCC_features_extractor(clean_df, dataset = 'train'):
 ##########################################################################################################
 
 def MEL_spect_features_extractor(clean_df, dataset = 'train'):
-
+    '''
+    This function takes in the DataFrame with the information about the original data.
+    It loops over it and applies the get_MEL_spectrogram() function to the audio array.
+    '''
     assert dataset == 'train' or dataset == 'test'
 
     dir_path = os.path.dirname(os.getcwd())
@@ -113,6 +123,10 @@ def MEL_spect_features_extractor(clean_df, dataset = 'train'):
 
 
 def get_ASR_input(clean_df, dataset: str):
+    '''
+    This function takes in the DataFrame with all the info about our data with a string ('train' or 'test').
+    Returns the ASR_input as DataFrame (saves it to BQ as well).
+    '''
     assert dataset == 'train' or dataset == 'test'
     dir_path = os.path.dirname(os.getcwd())
     if dataset == 'train':

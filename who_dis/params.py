@@ -16,18 +16,4 @@ DATA_TARGET = 'bq'
 ##################  PATHS  ##################
 LOCAL_REGISTRY_PATH = os.path.abspath(os.getcwd())
 # LOCAL_REGISTRY_PATH = os.path.abspath(os.path.dirname(os.getcwd()))
-# BUCKET_MODEL_PATH=''
 
-##################  PREPROCESSING  ##################
-
-# duration = None
-# sample_rate = 16000
-# n_fft = 512
-# hop_length = 256
-# n_mels = 128
-
-##################  TRAIN_MODEL  ##################
-learning_rate = 0.001
-batch_size=64
-patience=5
-validation_split=0.2

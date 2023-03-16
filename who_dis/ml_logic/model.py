@@ -119,7 +119,7 @@ def train_model(model: Model,
     history = model.fit(X_train,
                         y_train,
                       batch_size=batch_size, # !! if batch size -too small--> no generalization
-                      epochs=epochs,    #            
+                      epochs=epochs,    #
                       validation_split=validation_split,
                       callbacks=[es],
                       verbose=1)
@@ -135,7 +135,7 @@ def evaluate_model(model: Model,
                    batch_size: int) -> Tuple[Model, dict]:
 
     """
-    Evaluate trained model performance on dataset
+    Evaluate trained model performance on dataset.
     """
     print(Fore.BLUE + f"\nEvaluate model on {len(X_test)} rows..." + Style.RESET_ALL)
 
@@ -158,9 +158,3 @@ def evaluate_model(model: Model,
     print(f"✅ model evaluated: accuracy, precision, recall {round(accuracy, 3)}, {round(precision, 3)}, {round(recall, 3)}")
 
     return metrics
-
-def predict_model(model, X_pred):
-    
-    model_prediction = model.predict(X_pred)
-
-    return model_prediction
