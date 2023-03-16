@@ -40,7 +40,7 @@ def save_preprocessed(X,y,data: str ) -> None:
     # save preprocessed data locally
     data_path = os.path.join(LOCAL_REGISTRY_PATH, 'prepro_data')
 
-    if DATA_TARGET == 'local':    
+    if DATA_TARGET == 'local':
         X_filename = os.path.join(data_path,f'{data}/X_{data}.pickle')
         y_filename = os.path.join(data_path, f'{data}/y_{data}.pickle')
         with open(X_filename, 'wb') as handle:
@@ -54,7 +54,7 @@ def save_preprocessed(X,y,data: str ) -> None:
         from google.cloud import storage
         client = storage.Client()
         bucket = client.bucket(PREPRO_BUCKET)
-        
+
         X_filename = os.path.join(data_path,f'{data}/X_{data}.pickle')
         y_filename = os.path.join(data_path, f'{data}/y_{data}.pickle')
 
