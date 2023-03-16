@@ -5,10 +5,10 @@
 
 FROM tensorflow/tensorflow:2.10.0
 # All the directories from the /taxifare project needed to run the API
-COPY requirements.txt requirements.txt
+COPY requirements_prod.txt requirements.txt
 RUN pip install -r requirements.txt
 
-
+#CREDENTIAL JSON
 COPY credentialsdocker.json credentials.json
 
 # COPY api /api
@@ -29,6 +29,3 @@ RUN mkdir -p models
 # #Let's connect to our running continer
 # taxifare.api.fast:app est le chemain des fichiers pour aller chercher app
 CMD  uvicorn who_dis.api.fast:app --host 0.0.0.0 --port $PORT
-
-#CREDENTIAL JSON
-# COPY credentials.json credentials.json
