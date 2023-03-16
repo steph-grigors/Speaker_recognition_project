@@ -6,12 +6,20 @@ from who_dis.interface.main import pred
 from who_dis.ml_logic.registry import load_preprocessed, load_audio_file, load_model
 from who_dis.ml_logic.preprocess import get_MEL_spectrogram
 import io
-
+import joblib
+import tensorflow as tf
 
 ###################### / ######################
 
+
 app = FastAPI()
 model = load_model()
+# gcs_path = 'gs://speaker_reco_models/models/20230315-124458.h5'
+# file = io.BytesIO(tf.io.gfile.GFile(gcs_path, 'rb'))
+# loaded_model = joblib.load(tf.io.gfile.GFile(gcs_path, 'rb'))
+# model = joblib.load(tf.io.gfile.GFile(gcs_path, 'rb'))
+
+
 
 # Define a root `/` endpoint
 @app.get('/')
