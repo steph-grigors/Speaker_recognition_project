@@ -8,9 +8,11 @@ from who_dis.ml_logic.preprocess import get_MEL_spectrogram
 from who_dis.ml_logic.ASR import get_audio_array, get_transcript
 from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
 import io
-
+import joblib
+import tensorflow as tf
 
 ###################### / ######################
+
 
 app = FastAPI()
 model = load_model()

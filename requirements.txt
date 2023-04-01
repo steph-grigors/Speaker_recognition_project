@@ -34,6 +34,7 @@ python-dotenv
 fastapi
 uvicorn
 python-multipart
+joblib
 
 # Features extraction and MEL-Spect
 librosa
