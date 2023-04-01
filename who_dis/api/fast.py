@@ -5,6 +5,8 @@ import numpy as np
 from who_dis.interface.main import pred
 from who_dis.ml_logic.registry import load_preprocessed, load_audio_file, load_model
 from who_dis.ml_logic.preprocess import get_MEL_spectrogram
+from who_dis.ml_logic.ASR import get_audio_array, get_transcript
+from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
 import io
 import joblib
 import tensorflow as tf
@@ -14,12 +16,8 @@ import tensorflow as tf
 
 app = FastAPI()
 model = load_model()
-# gcs_path = 'gs://speaker_reco_models/models/20230315-124458.h5'
-# file = io.BytesIO(tf.io.gfile.GFile(gcs_path, 'rb'))
-# loaded_model = joblib.load(tf.io.gfile.GFile(gcs_path, 'rb'))
-# model = joblib.load(tf.io.gfile.GFile(gcs_path, 'rb'))
-
-
+processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base-960h")
+ASRmodel = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-base-960h")
 
 # Define a root `/` endpoint
 @app.get('/')
@@ -72,4 +70,16 @@ async def pred(wav: UploadFile=File(...)):
     return {
         'id': y_pred,
         'name': name_pred
+    }
+
+@app.post('/transcript')
+async def trans(wav: UploadFile=File(...)):
+    '''
+    Returns the text (as string) being read in the input wav file.
+    '''
+    audiofile = io.BytesIO(await wav.read())
+    array = get_audio_array(audiofile)
+    transcript = get_transcript(array)
+    return {
+        'text': transcript
     }
